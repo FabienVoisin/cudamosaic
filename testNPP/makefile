@@ -5,15 +5,11 @@ LIBS=$(shell pkg-config --libs opencv4) -lnppist  -lnppitc -lnppicc -lnppial -ln
 .PHONY: default
 default: mosaic
 
-src/astroio.o: src/astroio.cu
-	$(CC) -c $(INCLUDE) -o $@ $< $(LIBS)
-
 src/main.o:	src/main.cu
 	$(CC) -c $(INCLUDE) -o $@ $< $(LIBS)
 
-
-mosaic:	src/main.o src/astroio.o
-	$(CC) $(INCLUDE) -o $@  src/main.o  $(LIBS) 
+mosaic:	src/main.o
+	$(CC) $(INCLUDE) -o $@ src/main.o $(LIBS) 
 
 
 clean: 
