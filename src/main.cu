@@ -1,7 +1,7 @@
 #include "struct.cuh"
 
 int main(){
-    astrojpg_8u_rgb image1("data/test.jpg");
+    astrojpg_8u_rgb image1("Orion/orion_1.jpg");
     image1.getgreyimage(); //get the grey image 
     Npp8u* maxbuffer;
     size_t  maxbufferhostsize;

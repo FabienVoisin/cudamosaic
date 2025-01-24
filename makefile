@@ -12,7 +12,7 @@ src/main.o:	src/main.cu
 	$(CC) -c $(INCLUDE) -o $@ $< $(LIBS)
 
 
-mosaic:	src/main.o src/astroio.o
+mosaic:	src/main.o
 	$(CC) $(INCLUDE) -o $@  src/main.o  $(LIBS) 
 
 
