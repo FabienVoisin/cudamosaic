@@ -1,17 +1,15 @@
-#include "astroio.cuh"
+#pragma once
+#include <iostream>
+#include <Common/UtilNPP/ImagesCPU.h>
+#include <Common/UtilNPP/ImagesNPP.h>
+#include <Common/UtilNPP/Exceptions.h>
+#include <npp.h>
+//#include <nppdefs.h>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/core.hpp>
+#include <vector>
 #include <iostream>
 
-template<typename D, unsigned int N> 
-void saveastro(npp::ImageNPP<D,N> &image,std::string outputfilename){
-    npp::ImageCPU<D,N,npp::ImageAllocatorCPU<D,N>> oHostdest(image.size());
-    image.copyTo(oHostdest.data(),oHostdest.pitch());
-    if (std::is_same<D,Npp8u>::value){
-        if (N == 1){
-        cv::Mat outputimg((int)oHostdest.height(),(int)oHostdest.width(),CV_8UC1,(void *)oHostdest.data(),(size_t)oHostdest.pitch());
-        imwrite(outputfilename,outputimg);
-        }
-    }
-}
 
 
 template <typename D, unsigned int N>
@@ -66,6 +64,11 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
         this->nppinputimage=nppinputfile;
         }
 
+        astrojpg_8u_rgb(unsigned int imagewidth, unsigned int imageheight){
+            npp::ImageNPP_8u_C3 nppinputfile(imagewidth,imageheight);
+            this->nppinputimage=nppinputfile;
+        }
+
         void getgreyimage(){
         npp::ImageNPP_8u_C1 nppgreyfile(this->nppinputimage.width(),this->nppinputimage.height());
         NppiSize osizeROI={(int)this->nppinputimage.width(),(int)this->nppinputimage.height()};
@@ -85,5 +88,3 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
 
          
 };
-
-
