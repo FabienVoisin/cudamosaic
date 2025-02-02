@@ -51,6 +51,8 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
         npp::ImageNPP_8u_C3 nppinputimage;
         npp::ImageNPP_8u_C1 nppgreyimage;
         npp::ImageNPP_8u_C1 signalimage;
+        npp::ImageNPP_32s_C1 maskimage;
+        npp::ImageNPP_8u_C1 correlationimage;
         cv::Point_<int> hostmaxpixelposition;
         astrojpg_8u_rgb(std::string filename){ //Constructor to load image to NPP
             
@@ -84,7 +86,51 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
             this->signalimage=nppdestfile;
         }
 
-         
+        void createROIdata(int squaresize){
+            NppiSize osizeROI={squaresize,squaresize}; //Setup the osizeROI
+
+            int initpositionx=this->maxpixelposition.x-squaresize/2+1; 
+            int initpositiony=this->maxpixelposition.y-squaresize/2+1;
+            std::cout<<initpositionx<<","<<initpositiony<<std::endl;
+            npp::ImageNPP_8u_C1 outputROIimage(squaresize,squaresize);
+            npp::ImageNPP_8u_C1 outputmirrorimage(squaresize,squaresize);
+            npp::ImageNPP_32s_C1 outputfinalimage(squaresize,squaresize);
+            cudaError_t eResult;
+
+            eResult=cudaMemcpy2D(outputROIimage.data(),outputROIimage.pitch(),this->signalimage.data(initpositionx,initpositiony),this->signalimage.pitch(),outputROIimage.width()*sizeof(Npp8u),outputROIimage.height(),cudaMemcpyDeviceToDevice);
+            NPP_ASSERT(cudaSuccess == eResult);
+            /*nppiMirror will flip the image so that the last values become the first, necessary for the convolution*/
+            nppiMirror_8u_C1R(outputROIimage.data(),(int)outputROIimage.pitch(), outputmirrorimage.data(),(int)outputmirrorimage.pitch(), osizeROI, NPP_BOTH_AXIS);
+            /*Finally we need to convert to 32s*/
+            nppiConvert_8u32s_C1R(outputmirrorimage.data(),outputmirrorimage.pitch(),outputfinalimage.data(),outputfinalimage.pitch(),osizeROI);
+            this->maskimage=outputfinalimage;
+            //nppiFree(outputROIimage.data());
+            //nppiFree(outputmirrorimage.data());
+        }
+
+        void Correlationimage(npp::ImageNPP_32s_C1 &maskimage,Npp8u *sumbuffer){
+            NppiSize osizeROI={(int)this->signalimage.width(),(int)this->signalimage.height()};
+            NppiSize omaskROI={(int)maskimage.width(),(int)maskimage.height()};
+            NppiSize okernelSize={(int)maskimage.width(),(int)maskimage.height()};
+            NppiPoint oAnchor={(int)(maskimage.width()/2),(int)(maskimage.height()/2)};
+            npp::ImageNPP_32f_C1 maskimagesum(maskimage.width(),maskimage.height());
+            npp::ImageNPP_8u_C1 outputimage(this->signalimage.size());
+            NppStatus status=nppiConvert_32s32f_C1R(maskimage.data(),(int) maskimage.pitch(), maskimagesum.data(),(int) maskimagesum.pitch(), omaskROI);
+            NPP_ASSERT(NPP_SUCCESS  == status);
+
+            Npp64f *nsum;
+            Npp64f hostnsum;
+            cudaMalloc((void **)&nsum,sizeof(Npp64f));
+            nppiSum_32f_C1R(maskimagesum.data(),maskimagesum.pitch(),omaskROI, sumbuffer, nsum);  
+            cudaDeviceSynchronize();
+            cudaMemcpy(&hostnsum,nsum,sizeof(Npp64f),cudaMemcpyDeviceToHost);
+            Npp32s ndivisor=(Npp32s) hostnsum;
+            std::cout<<"hostnsum="<<ndivisor<<std::endl; 
+            status=nppiFilter_8u_C1R(this->signalimage.data(), this->signalimage.pitch(), outputimage.data(), outputimage.pitch(),osizeROI, maskimage.data(), okernelSize, oAnchor,  ndivisor);
+            NPP_ASSERT(NPP_SUCCESS  == status);
+            this->correlationimage=outputimage;
+            //nppiFree((void*)maskimagesum.data());
+        }
 
          
 };
