@@ -2,7 +2,7 @@
 #include "astroio.h"
 
 int main(){
-    astrojpg_8u_rgb image1("Orion/orion_80.jpg");
+    astrojpg_8u_rgb image1("Orion/orion_79.jpg");
     image1.getgreyimage(); //get the grey image 
     Npp8u* maxbuffer;
     Npp8u* sumbuffer;

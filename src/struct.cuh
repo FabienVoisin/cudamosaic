@@ -20,8 +20,9 @@ class Nppop{
     npp::ImageNPP_32s_C1 maskimage;
     npp::ImageNPP<D,1> signalimage;
     npp::ImageNPP<D,1> correlationimage;
+    npp::ImageNPP<D,1> exposuremap;
 
-    Nppop(){}
+    Nppop():maskimage(1,1),signalimage(1,1),correlationimage(1,1),exposuremap(1,1),maxpixelposition(-1,-1),maxcorrposition(-1,-1){}
     
     void getsignalimage(npp::ImageNPP<D,1> &nppgreyimage,const D threshold){
             
@@ -72,8 +73,6 @@ class Nppop{
         /*Finally we need to convert to 32s*/
         nppiConvert_8u32s_C1R(outputmirrorimage.data(),outputmirrorimage.pitch(),outputfinalimage.data(),outputfinalimage.pitch(),osizeROI);
         this->maskimage=outputfinalimage;
-        //nppiFree(outputROIimage.data());
-        //nppiFree(outputmirrorimage.data());
     }
 
     void Correlationimage(npp::ImageNPP_32s_C1 &maskimage,Npp8u *sumbuffer){
@@ -102,10 +101,46 @@ class Nppop{
         //nppiFree((void*)maskimagesum.data());
     }
 
+    
 
-    /*Addimage(){
-        nppiAdd_8u_C3RSfs(const Npp8u *pSrc1, int nSrc1Step, const Npp8u *pSrc2, int nSrc2Step, Npp8u *pDst, int nDstStep, NppiSize oSizeROI, int nScaleFactor);
-    }*/
+
+    template<typename D2, unsigned int N2>
+    void resizeimage(npp::ImageNPP<D2,N2> &inputimage,unsigned int newimagewidth, unsigned int newimageheight,cv::Point_<int> imageposition){
+        npp::ImageNPP<D2,N2> tempimage(newimagewidth,newimageheight);
+        unsigned int offsetpositionx=(imageposition.x>=0)*imageposition.x+(imageposition.x<0)*0;
+        unsigned int offsetpositiony=(imageposition.y>=0)*imageposition.y+(imageposition.y<0)*0;
+        cudaError_t eResult;
+        if (std::is_same<D2,Npp8u>::value){
+           switch(N2){
+                case 1:
+                eResult=cudaMemcpy2D(tempimage.data(),tempimage.pitch(),inputimage.data(offsetpositionx,offsetpositiony),inputimage.pitch(),inputimage.width()*sizeof(Npp8u),inputimage.height(),cudaMemcpyDeviceToDevice);
+                break;
+                case 3:
+               /*Need to multiply the width by 3 to include the number of channels*/
+                eResult=cudaMemcpy2D(tempimage.data(),tempimage.pitch(),inputimage.data(offsetpositionx,offsetpositiony),inputimage.pitch(),inputimage.width()*sizeof(Npp8u)*3,inputimage.height(),cudaMemcpyDeviceToDevice);
+                break;
+            }
+        }
+        else if (std::is_same<D2,Npp32s>::value){
+            switch(N2){
+                 case 1:
+                 eResult=cudaMemcpy2D(tempimage.data(),tempimage.pitch(),inputimage.data(offsetpositionx,offsetpositiony),inputimage.pitch(),inputimage.width()*sizeof(Npp32s),inputimage.height(),cudaMemcpyDeviceToDevice);
+                 break;
+                 case 3:
+                /*Need to multiply the width by 3 to include the number of channels*/
+                 eResult=cudaMemcpy2D(tempimage.data(),tempimage.pitch(),inputimage.data(offsetpositionx,offsetpositiony),inputimage.pitch(),inputimage.width()*sizeof(Npp32s)*3,inputimage.height(),cudaMemcpyDeviceToDevice);
+                 break;
+             }
+         }
+        /*Now we replace the original inputimage by the new tempimage*/
+        inputimage=tempimage;
+    }
+    void shiftposition(cv::Point_<int> &position,cv::Point_<int> offsetposition){
+        cv::Point_<int> newposition;
+        newposition.x=position.x+(offsetposition.x>=0)*offsetposition.x;
+        newposition.y=position.y+(offsetposition.y>=0)*offsetposition.y;
+        position=newposition;
+    }
     
 
 };
@@ -118,21 +153,29 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
         
         
         
-        astrojpg_8u_rgb(std::string filename){ //Constructor to load image to NPP
+        astrojpg_8u_rgb(std::string filename):
+        nppinputimage(1,1),nppgreyimage(1,1)
+        { //Constructor to load image to NPP
             
             cv::Mat img=imread(filename,cv::IMREAD_COLOR);
             npp::ImageCPU_8u_C3 localhostimg((unsigned int)img.size().width,(unsigned int)img.size().height);
-            for (size_t i=0;i<img.rows;i++){
+            for (size_t i=0;i<img.rows;i++)       
+            {
                 unsigned char *input = (unsigned char*)(img.data);
                 memcpy(localhostimg.data(0,i),&input[img.step[0]*i],img.step1());
             }
         npp::ImageNPP_8u_C3 nppinputfile(localhostimg); //Creation of the NPP
         this->nppinputimage=nppinputfile;
+        /*I need to add the exposure initialisation*/
+        addexposure(nppinputfile);
         }
 
-        astrojpg_8u_rgb(unsigned int imagewidth, unsigned int imageheight){
+        astrojpg_8u_rgb(unsigned int imagewidth, unsigned int imageheight):
+        nppinputimage(1,1),nppgreyimage(1,1)
+        {
             npp::ImageNPP_8u_C3 nppinputfile(imagewidth,imageheight);
             this->nppinputimage=nppinputfile;
+            addexposure(nppinputfile);
         }
 
         void getgreyimage(){
@@ -142,6 +185,35 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
         this->nppgreyimage=nppgreyfile;
         }
         
+        void resize(unsigned int newimagewidth, unsigned int newimageheight,cv::Point_<int> imageposition){
+            if (this->nppinputimage.width()*this->nppinputimage.height()!=1) resizeimage<Npp8u,3>(this->nppinputimage,newimagewidth,newimageheight,imageposition);
+            if (this->nppgreyimage.width()*this->nppgreyimage.height()!=1) resizeimage<Npp8u,1>(this->nppgreyimage,newimagewidth,newimageheight,imageposition);
+            if (this->maskimage.width()*this->maskimage.height()!=1) resizeimage<Npp32s,1>(this->maskimage,newimagewidth,newimageheight,imageposition);
+            if (this->signalimage.width()*this->signalimage.height()!=1) resizeimage<Npp8u,1>(this->signalimage,newimagewidth,newimageheight,imageposition);
+            if (this->correlationimage.width()*this->correlationimage.height()!=1) resizeimage<Npp8u,1>(this->correlationimage,newimagewidth,newimageheight,imageposition);
+            if (this->exposuremap.width()*this->exposuremap.height()!=1) resizeimage<Npp8u,1>(this->exposuremap,newimagewidth,newimageheight,imageposition);
+            if(this->maxpixelposition.x>-1 && this->maxpixelposition.y>-1) shiftposition(this->maxpixelposition,imageposition);
+            if(this->maxcorrposition.x>-1 && this->maxcorrposition.y>-1) shiftposition(this->maxcorrposition,imageposition);
+ 
+        }
 
-         
+
+        /*I need to add exposure based on the ROI from the reference and target image auto-correlation */
+        void stackimage(astrojpg_8u_rgb &addedimage,cv::Point_<int> targetmaxcorrposition){
+            unsigned int newimagewidth=this->nppinputimage.width()+std::abs(targetmaxcorrposition.x);
+            unsigned int newimageheight=this->nppinputimage.height()+std::abs(targetmaxcorrposition.y);
+            resize(newimagewidth,newimageheight,targetmaxcorrposition);
+
+        }
+        /*I need to first use the previous exposure map and add it onto the new map with the specific offset*/
+
+        //nppiAdd_8u_C3RSfs(const Npp8u *pSrc1, int nSrc1Step, const Npp8u *pSrc2, int nSrc2Step, Npp8u *pDst, int nDstStep, NppiSize oSizeROI, int nScaleFactor);
+        //} 
+    private:
+        void addexposure(npp::ImageNPP_8u_C3 &nppinputfile){
+            npp::ImageNPP_8u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+            NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
+            nppiAddC_8u_C1IRSfs(1,tempexposuremap.data(), (int)tempexposuremap.pitch(),osizeROI,1);
+            this->exposuremap=tempexposuremap;
+        }       
 };
