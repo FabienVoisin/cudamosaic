@@ -74,7 +74,7 @@ class Nppop{
         nppiConvert_8u32s_C1R(outputmirrorimage.data(),outputmirrorimage.pitch(),outputfinalimage.data(),outputfinalimage.pitch(),osizeROI);
         this->maskimage=outputfinalimage;
     }
-
+        /*I need to make sure this is changed to appropriate output*/
     void Correlationimage(npp::ImageNPP_32s_C1 &maskimage,Npp8u *sumbuffer){
         NppiSize osizeROI={(int)this->signalimage.width(),(int)this->signalimage.height()};
         NppiSize omaskROI={(int)maskimage.width(),(int)maskimage.height()};
@@ -135,25 +135,62 @@ class Nppop{
         /*Now we replace the original inputimage by the new tempimage*/
         inputimage=tempimage;
     }
+    
     void shiftposition(cv::Point_<int> &position,cv::Point_<int> offsetposition){
         cv::Point_<int> newposition;
         newposition.x=position.x+(offsetposition.x>=0)*offsetposition.x;
         newposition.y=position.y+(offsetposition.y>=0)*offsetposition.y;
         position=newposition;
     }
-    
 
+    template<typename D2, unsigned int N2>
+    void addimage(npp::ImageNPP<D2,N2> &inputimage,npp::ImageNPP<D2,N2> &extimage, cv::Point_<int> imageposition){
+        unsigned int offsetpositionx=(imageposition.x<0)*std::abs(imageposition.x)+(imageposition.x>=0)*0;
+        unsigned int offsetpositiony=(imageposition.y<0)*std::abs(imageposition.y)+(imageposition.y>=0)*0;
+        npp::ImageNPP<D2,N2> tempimage(inputimage.width(),inputimage.height()); //get the same size properties of input data (previously updated through resize)
+        nppiadd<N2>(inputimage,extimage,tempimage,offsetpositionx,offsetpositiony);    
+        inputimage=tempimage;
+    }
+
+
+    private:
+    template<unsigned int N2>
+    void nppiadd(npp::ImageNPP<Npp32f,N2> &inputimage, npp::ImageNPP<Npp32f,N2> &extimage, npp::ImageNPP<Npp32f,N2> &tempimage,unsigned int offsetpositionx, unsigned int offsetpositiony){
+        NppiSize AddROI={extimage.width(),extimage.height()};
+        switch(N2){
+            case 3:
+                nppiAdd_32f_C3R(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(offsetpositionx,offsetpositiony), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI);
+                break;
+        }        
+
+    }
+    template<unsigned int N2>
+    void nppiadd(npp::ImageNPP<Npp8u,N2> &inputimage, npp::ImageNPP<Npp8u,N2> &extimage, npp::ImageNPP<Npp8u,N2> &tempimage,unsigned int offsetpositionx, unsigned int offsetpositiony){
+        NppiSize AddROI={extimage.width(),extimage.height()};
+        switch(N2){
+            case 1: 
+                    nppiAdd_8u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(offsetpositionx,offsetpositiony), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    break;
+            case 3:
+                    nppiAdd_8u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(offsetpositionx,offsetpositiony), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    break;    
+        }        
+
+    }
+    
 };
 
-class astrojpg_8u_rgb : public Nppop<Npp8u, 3> 
+
+template <typename D>
+class astrojpg_rgb_ : public Nppop<D, 3> 
 {
     public: 
-        npp::ImageNPP_8u_C3 nppinputimage;
-        npp::ImageNPP_8u_C1 nppgreyimage;
+        npp::ImageNPP<D,3> nppinputimage;
+        npp::ImageNPP<D,1> nppgreyimage;
         
         
         
-        astrojpg_8u_rgb(std::string filename):
+        astrojpg_rgb_(std::string filename):
         nppinputimage(1,1),nppgreyimage(1,1)
         { //Constructor to load image to NPP
             
@@ -165,44 +202,57 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
                 memcpy(localhostimg.data(0,i),&input[img.step[0]*i],img.step1());
             }
         npp::ImageNPP_8u_C3 nppinputfile(localhostimg); //Creation of the NPP
-        this->nppinputimage=nppinputfile;
+        setinputNPP(nppinputfile,this->nppinputimage);
+        
         /*I need to add the exposure initialisation*/
-        addexposure(nppinputfile);
+        addexposure(this->nppinputimage);
         }
 
-        astrojpg_8u_rgb(unsigned int imagewidth, unsigned int imageheight):
+        astrojpg_rgb_(unsigned int imagewidth, unsigned int imageheight):
         nppinputimage(1,1),nppgreyimage(1,1)
         {
-            npp::ImageNPP_8u_C3 nppinputfile(imagewidth,imageheight);
+            npp::ImageNPP<D,3> nppinputfile(imagewidth,imageheight);
             this->nppinputimage=nppinputfile;
             addexposure(nppinputfile);
         }
 
         void getgreyimage(){
-        npp::ImageNPP_8u_C1 nppgreyfile(this->nppinputimage.width(),this->nppinputimage.height());
-        NppiSize osizeROI={(int)this->nppinputimage.width(),(int)this->nppinputimage.height()};
-        nppiRGBToGray_8u_C3C1R(this->nppinputimage.data(), this->nppinputimage.pitch(), nppgreyfile.data(), nppgreyfile.pitch(),osizeROI);
+        npp::ImageNPP<D,1> nppgreyfile(this->nppinputimage.width(),this->nppinputimage.height());
+        rgbtogray(this->nppinputimage,nppgreyfile);
         this->nppgreyimage=nppgreyfile;
         }
         
         void resize(unsigned int newimagewidth, unsigned int newimageheight,cv::Point_<int> imageposition){
-            if (this->nppinputimage.width()*this->nppinputimage.height()!=1) resizeimage<Npp8u,3>(this->nppinputimage,newimagewidth,newimageheight,imageposition);
-            if (this->nppgreyimage.width()*this->nppgreyimage.height()!=1) resizeimage<Npp8u,1>(this->nppgreyimage,newimagewidth,newimageheight,imageposition);
-            if (this->maskimage.width()*this->maskimage.height()!=1) resizeimage<Npp32s,1>(this->maskimage,newimagewidth,newimageheight,imageposition);
-            if (this->signalimage.width()*this->signalimage.height()!=1) resizeimage<Npp8u,1>(this->signalimage,newimagewidth,newimageheight,imageposition);
-            if (this->correlationimage.width()*this->correlationimage.height()!=1) resizeimage<Npp8u,1>(this->correlationimage,newimagewidth,newimageheight,imageposition);
-            if (this->exposuremap.width()*this->exposuremap.height()!=1) resizeimage<Npp8u,1>(this->exposuremap,newimagewidth,newimageheight,imageposition);
-            if(this->maxpixelposition.x>-1 && this->maxpixelposition.y>-1) shiftposition(this->maxpixelposition,imageposition);
-            if(this->maxcorrposition.x>-1 && this->maxcorrposition.y>-1) shiftposition(this->maxcorrposition,imageposition);
+            if (this->nppinputimage.width()*this->nppinputimage.height()!=1) Nppop<D,3>::template resizeimage<D,3>(this->nppinputimage,newimagewidth,newimageheight,imageposition);
+            if (this->nppgreyimage.width()*this->nppgreyimage.height()!=1) Nppop<D,3>::template resizeimage<D,1>(this->nppgreyimage,newimagewidth,newimageheight,imageposition);
+            if (this->maskimage.width()*this->maskimage.height()!=1) Nppop<D,3>::template resizeimage<Npp32s,1>(this->maskimage,newimagewidth,newimageheight,imageposition);
+            if (this->signalimage.width()*this->signalimage.height()!=1) Nppop<D,3>::template resizeimage<D,1>(this->signalimage,newimagewidth,newimageheight,imageposition);
+            if (this->correlationimage.width()*this->correlationimage.height()!=1) Nppop<D,3>::template resizeimage<D,1>(this->correlationimage,newimagewidth,newimageheight,imageposition);
+            if (this->exposuremap.width()*this->exposuremap.height()!=1) Nppop<D,3>::template resizeimage<D,1>(this->exposuremap,newimagewidth,newimageheight,imageposition);
+            if(this->maxpixelposition.x>-1 && this->maxpixelposition.y>-1) Nppop<D,3>::shiftposition(this->maxpixelposition,imageposition);
+            if(this->maxcorrposition.x>-1 && this->maxcorrposition.y>-1)  Nppop<D,3>::shiftposition(this->maxcorrposition,imageposition);
  
         }
 
 
         /*I need to add exposure based on the ROI from the reference and target image auto-correlation */
-        void stackimage(astrojpg_8u_rgb &addedimage,cv::Point_<int> targetmaxcorrposition){
+        void stackimage(astrojpg_rgb_<Npp8u> &addedimage,cv::Point_<int> targetmaxcorrposition){
+
             unsigned int newimagewidth=this->nppinputimage.width()+std::abs(targetmaxcorrposition.x);
             unsigned int newimageheight=this->nppinputimage.height()+std::abs(targetmaxcorrposition.y);
             resize(newimagewidth,newimageheight,targetmaxcorrposition);
+
+            /*I then need to create a 32f value of the targetimage*/
+            NppiSize convertimageROI={(int)addedimage.nppinputimage.width(),(int)addedimage.nppinputimage.height()};
+
+            npp::ImageNPP<Npp32f,3> converted32faddedimage(addedimage.nppinputimage.size());
+            nppiConvert_8u32f_C3R(addedimage.nppinputimage.data(), addedimage.nppinputimage.pitch(), converted32faddedimage.data(), converted32faddedimage.pitch(), convertimageROI);
+            Nppop<D,3>::template addimage<D,3>(this->nppinputimage,converted32faddedimage,targetmaxcorrposition);
+            addexposure(this->nppinputimage);
+            /* Now add values from other image properties */
+            npp::ImageNPP<Npp32f,1> converted32faddedgreyimage(addedimage.nppgreyimage.size());
+            nppiConvert_8u32f_C1R(addedimage.nppgreyimage.data(), addedimage.nppgreyimage.pitch(),converted32faddedgreyimage.data(),converted32faddedgreyimage.pitch(),convertimageROI);
+            Nppop<D,3>::template addimage<D,1>(this->nppgreyimage,converted32faddedgreyimage,targetmaxcorrposition);
 
         }
         /*I need to first use the previous exposure map and add it onto the new map with the specific offset*/
@@ -210,10 +260,38 @@ class astrojpg_8u_rgb : public Nppop<Npp8u, 3>
         //nppiAdd_8u_C3RSfs(const Npp8u *pSrc1, int nSrc1Step, const Npp8u *pSrc2, int nSrc2Step, Npp8u *pDst, int nDstStep, NppiSize oSizeROI, int nScaleFactor);
         //} 
     private:
+        void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_32f_C3 &nppinputimage){
+            npp::ImageNPP_32f_C3 nppconvertedfile(nppinputfile.width(),nppinputfile.height());
+                /*We need to convert from 8u to 32s*/
+            NppiSize convertsizeROI={nppinputfile.width(),nppinputfile.height()};
+            nppiConvert_8u32f_C3R(nppinputfile.data(), nppinputfile.pitch(), nppconvertedfile.data(), nppconvertedfile.pitch(),convertsizeROI);
+            nppinputimage=nppconvertedfile;
+        }
+        void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_8u_C3 &nppinputimage){
+            nppinputimage=nppinputfile;
+        }
+
+        void rgbtogray(npp::ImageNPP_8u_C3 &nppinputimage, npp::ImageNPP_8u_C1 &nppgreyfile){
+            NppiSize osizeROI={(int)nppinputimage.width(),(int)nppinputimage.height()};
+            nppiRGBToGray_8u_C3C1R(nppinputimage.data(),nppinputimage.pitch(), nppgreyfile.data(), nppgreyfile.pitch(),osizeROI);
+        }
+
+        void rgbtogray(npp::ImageNPP_32f_C3 &nppinputimage, npp::ImageNPP_32f_C1 &nppgreyfile){
+            NppiSize osizeROI={(int)nppinputimage.width(),(int)nppinputimage.height()};
+            nppiRGBToGray_32f_C3C1R(this->nppinputimage.data(), this->nppinputimage.pitch(), nppgreyfile.data(), nppgreyfile.pitch(),osizeROI);
+        }
+
         void addexposure(npp::ImageNPP_8u_C3 &nppinputfile){
             npp::ImageNPP_8u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
             nppiAddC_8u_C1IRSfs(1,tempexposuremap.data(), (int)tempexposuremap.pitch(),osizeROI,1);
             this->exposuremap=tempexposuremap;
-        }       
+        }
+        void addexposure(npp::ImageNPP_32f_C3 &nppinputfile){
+            npp::ImageNPP_32f_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+            NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
+            nppiAddC_32f_C1IR(1,tempexposuremap.data(), (int)tempexposuremap.pitch(),osizeROI);
+            this->exposuremap=tempexposuremap;
+        }
+
 };
