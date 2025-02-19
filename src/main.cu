@@ -1,11 +1,33 @@
 #include "struct.cuh"
 #include "astroio.h"
+#include <cstdlib>
+#include <vector>
+#include <string>
+#include <filesystem>
 
-
-
+void listfiles(std::string directorypath,std::vector<std::string> &list_of_files){
+    for (const auto& entry : std::filesystem::directory_iterator(directorypath)) {
+        std::filesystem::path outfilename = entry.path();
+        std::string outfilename_str = outfilename.string();
+        //std::cout<<outfilename_str<<std::endl;
+        list_of_files.push_back(outfilename_str);
+    }
+}
 
 int main(){
-    astrojpg_rgb_<Npp8u> image1("Orion/orion_1.jpg");
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, 0);
+    cudaMemPool_t memPool;
+    size_t free, total;
+    cudaMemGetInfo(&free,&total);
+    std::cout<<"free="<<free<<",total="<<total<<std::endl;
+    astrojpg_rgb_<Npp8u> image1("Orion/orion_20.jpg");
+    std::cout<<image1.nppinputimage.width()<<","<<image1.nppinputimage.height();
+    std::vector<std::string> files;
+    listfiles("/mnt/sdd/cudamosaic/Orion/",files);
+    std::stable_sort(files.begin(), files.end());
+    std::cout<<files[1]<<std::endl;
+    //for (auto filename: files) std::cout<<filename<<std::endl;
     image1.getgreyimage(); //get the grey image 
     Npp8u* maxbuffer;
     Npp8u* sumbuffer;
@@ -44,11 +66,14 @@ int main(){
     /*We need to load a new  image */
     std::cout<<"Am I here 2"<<std::endl;
     astrojpg_rgb_<Npp8u> image2("Orion/orion_1.jpg");
+    std::cout<<"Am I here 3"<<std::endl;
     image2.getgreyimage();
+    
     image2.getsignalimage(image2.nppgreyimage,threshold);
     /*Create three new images, the correlation image, the exposure map and the new combinbed image*/
     //npp::ImageNPP_8u_C1 correlation(image2.nppgreyimage.size());
     image2.Correlationimage(image1.maskimage,sumbuffer);
+    std::cout<<"Am I here 4"<<std::endl;
     std::cout<<"FINAL COUNTDOWN"<<std::endl;
     saveastro<Npp8u,1>(image2.correlationimage,"correlationexample.jpg");
     image2.getmaxpixel(image2.correlationimage,image2.maxcorrposition,maxbuffer);
@@ -62,18 +87,45 @@ int main(){
     std::cout<<"Maximum corr pixel: x="<<image3.maxcorrposition.x<<",y="<<image3.maxcorrposition.y<<std::endl;
 
     /*Create a new function for mosaicing the stuff*/
-    unsigned int differencex,differencey;
+    int differencex,differencey;
     
     astrojpg_rgb_<Npp32f> imagetotal("Orion/orion_1.jpg");
     imagetotal.getgreyimage();
     imagetotal.getsignalimage(imagetotal.nppgreyimage,threshold);
     imagetotal.Correlationimage(image1.maskimage,sumbuffer);
     imagetotal.getmaxpixel(imagetotal.correlationimage,imagetotal.maxcorrposition,maxbuffer);
-    differencex=image3.maxcorrposition.x-imagetotal.maxcorrposition.x;
-    differencey=image3.maxcorrposition.y-imagetotal.maxcorrposition.y;
-    std::cout<<"diff="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
-    cv::Point_<int> offsetposition={differencex,differencey};
-    imagetotal.stackimage(image3,offsetposition);
+    cudaDeviceSynchronize();
+    std::cout<<"am i here now"<<std::endl;
+    cudaMemGetInfo(&free,&total);
+    std::cout<<"free="<<free<<",total="<<total<<std::endl;
+    for (int i = 1 ; i<10 ;i++ ){
+        cudaMemGetInfo(&free,&total);
+    std::cout<<"free="<<free<<",total="<<total<<std::endl;
+        std::cout<<"filename="<<files[i]<<std::endl;
+        astrojpg_rgb_<Npp8u> iterimage(files[i]);
+        
+        iterimage.getgreyimage();
+        
+        iterimage.getsignalimage(iterimage.nppgreyimage,threshold);
+        
+        iterimage.Correlationimage(image1.maskimage,sumbuffer);
+        
+        iterimage.getmaxpixel(iterimage.correlationimage,iterimage.maxcorrposition,maxbuffer);
+        
+        differencex=iterimage.maxcorrposition.x-imagetotal.maxcorrposition.x;
+        differencey=iterimage.maxcorrposition.y-imagetotal.maxcorrposition.y;
+        cv::Point_<int> offsetposition={differencex,differencey};
+        std::cout<<"totalpos="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
+        std::cout<<"pos="<<iterimage.maxcorrposition.x<<","<<iterimage.maxcorrposition.y<<std::endl;
+        std::cout<<"diff="<<differencex<<","<<differencey<<std::endl;
+        std::cout<<"Am I now"<<std::endl;
+        imagetotal.stackimage(iterimage,offsetposition);
+        cudaDeviceSynchronize();
+    }
+    
+    //std::cout<<"diff="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
+    //cv::Point_<int> offsetposition={differencex,differencey};
+    //imagetotal.stackimage(image3,offsetposition);
     saveastro<Npp32f,3>(imagetotal.nppinputimage,"finalresult.jpg");
     saveastro<Npp32f,1>(imagetotal.exposuremap,"finalresultexp.jpg");
     return 0;

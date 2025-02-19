@@ -1,4 +1,4 @@
-CC=nvcc
+CC=nvcc --std=c++17
 INCLUDE=-I /mnt/sdd/cuda-samples -I /usr/include/opencv4 -I /usr/local/cuda-12.6/targets/x86_64-linux/include/
 LIBS=$(shell pkg-config --libs opencv4) -lnppist -lnppig -lnppidei  -lnppitc -lnppicc -lnppial -lnppisu_static -lnppif_static -lnppc_static -lculibos -lfreeimage
 
