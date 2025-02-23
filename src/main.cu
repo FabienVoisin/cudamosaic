@@ -98,29 +98,36 @@ int main(){
     std::cout<<"am i here now"<<std::endl;
     cudaMemGetInfo(&free,&total);
     std::cout<<"free="<<free<<",total="<<total<<std::endl;
-    for (int i = 1 ; i<10 ;i++ ){
-        cudaMemGetInfo(&free,&total);
-    std::cout<<"free="<<free<<",total="<<total<<std::endl;
-        std::cout<<"filename="<<files[i]<<std::endl;
-        astrojpg_rgb_<Npp8u> iterimage(files[i]);
+    int i=0;
+    for (std::string file : files ){
+        std::cout<<"filename="<<file<<std::endl;
+        astrojpg_rgb_<Npp8u> iterimage(file);
         
         iterimage.getgreyimage();
         
         iterimage.getsignalimage(iterimage.nppgreyimage,threshold);
-        
+        //std::string itersignal="itersignal"+std::to_string(i)+".jpg";
+        //saveastro<Npp8u,1>(iterimage.signalimage,itersignal);
         iterimage.Correlationimage(image1.maskimage,sumbuffer);
-        
+        //std::string itercorr="itercorr"+std::to_string(i)+".jpg";
+        //saveastro<Npp8u,1>(iterimage.correlationimage,itercorr);
         iterimage.getmaxpixel(iterimage.correlationimage,iterimage.maxcorrposition,maxbuffer);
         
         differencex=iterimage.maxcorrposition.x-imagetotal.maxcorrposition.x;
         differencey=iterimage.maxcorrposition.y-imagetotal.maxcorrposition.y;
         cv::Point_<int> offsetposition={differencex,differencey};
-        std::cout<<"totalpos="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
-        std::cout<<"pos="<<iterimage.maxcorrposition.x<<","<<iterimage.maxcorrposition.y<<std::endl;
+        std::cout<<"totalwidth="<<imagetotal.nppinputimage.width()<<","<<imagetotal.nppinputimage.height()<<std::endl;
+    
         std::cout<<"diff="<<differencex<<","<<differencey<<std::endl;
         std::cout<<"Am I now"<<std::endl;
-        imagetotal.stackimage(iterimage,offsetposition);
+        imagetotal.stackimage(iterimage);
+        std::cout<<imagetotal.nppinputimage.width()<<","<<imagetotal.nppinputimage.height()<<std::endl;
         cudaDeviceSynchronize();
+        //std::string iterstack="finalresult_"+std::to_string(i)+".jpg";
+        //saveastro<Npp32f,3>(imagetotal.nppinputimage,iterstack);
+        std::string iterexp="finalexp_"+std::to_string(i)+".jpg";
+        saveastro<Npp32f,1>(imagetotal.exposuremap,iterexp);
+        i++;
     }
     
     //std::cout<<"diff="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
