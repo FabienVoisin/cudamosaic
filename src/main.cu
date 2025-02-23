@@ -21,11 +21,13 @@ int main(){
     size_t free, total;
     cudaMemGetInfo(&free,&total);
     std::cout<<"free="<<free<<",total="<<total<<std::endl;
-    astrojpg_rgb_<Npp8u> image1("testimage/orion_1.jpg");
-    std::cout<<image1.nppinputimage.width()<<","<<image1.nppinputimage.height();
     std::vector<std::string> files;
     listfiles("/mnt/sdd/cudamosaic/testimage/",files);
     std::stable_sort(files.begin(), files.end());
+    astrojpg_rgb_<Npp8u> image1(files[0]);
+    std::cout<<image1.nppinputimage.width()<<","<<image1.nppinputimage.height();
+    
+    
     std::cout<<files[1]<<std::endl;
     //for (auto filename: files) std::cout<<filename<<std::endl;
     image1.getgreyimage(); //get the grey image 
@@ -58,38 +60,14 @@ int main(){
     cudaDeviceSynchronize();
     image1.createROIdata(squaresize);
     saveastro<Npp32s,1>(image1.maskimage,"mask.jpg");
-    //image1.Correlationimage(image1.maskimage,sumbuffer);
-    //saveastro<Npp8u,1>(image1.correlationimage,"autocorrelation1.jpg");
-    //image1.getmaxpixel(image1.correlationimage,image1.maxcorrposition,maxbuffer);
-    //std::cout<<"Maximum corr pixel: x="<<image1.maxcorrposition.x<<",y="<<image1.maxcorrposition.y<<std::endl;
-
-    /*We need to load a new  image */
-    std::cout<<"Am I here 2"<<std::endl;
-    astrojpg_rgb_<Npp8u> image2("testimage/orion_1.jpg");
-    std::cout<<"Am I here 3"<<std::endl;
-    image2.getgreyimage();
     
-    image2.getsignalimage(image2.nppgreyimage,threshold);
-    /*Create three new images, the correlation image, the exposure map and the new combinbed image*/
-    //npp::ImageNPP_8u_C1 correlation(image2.nppgreyimage.size());
-    image2.Correlationimage(image1.maskimage,sumbuffer);
     std::cout<<"Am I here 4"<<std::endl;
     std::cout<<"FINAL COUNTDOWN"<<std::endl;
-    saveastro<Npp8u,1>(image2.correlationimage,"correlationexample.jpg");
-    image2.getmaxpixel(image2.correlationimage,image2.maxcorrposition,maxbuffer);
-    std::cout<<"Maximum corr pixel: x="<<image2.maxcorrposition.x<<",y="<<image2.maxcorrposition.y<<std::endl;
-    astrojpg_rgb_<Npp8u> image3("testimage/orion_4.jpg");
-    image3.getgreyimage();
-    image3.getsignalimage(image3.nppgreyimage,threshold);
-    image3.Correlationimage(image1.maskimage,sumbuffer);
-    saveastro<Npp8u,1>(image3.correlationimage,"correlationexample2.jpg");
-    image3.getmaxpixel(image3.correlationimage,image3.maxcorrposition,maxbuffer);
-    std::cout<<"Maximum corr pixel: x="<<image3.maxcorrposition.x<<",y="<<image3.maxcorrposition.y<<std::endl;
-
+    
     /*Create a new function for mosaicing the stuff*/
     int differencex,differencey;
     
-    astrojpg_rgb_<Npp32f> imagetotal("testimage/orion_1.jpg");
+    astrojpg_rgb_<Npp32f> imagetotal(files[1]);
     imagetotal.getgreyimage();
     imagetotal.getsignalimage(imagetotal.nppgreyimage,threshold);
     imagetotal.Correlationimage(image1.maskimage,sumbuffer);
