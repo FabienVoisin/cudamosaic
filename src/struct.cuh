@@ -333,10 +333,10 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             
             std::cout<<"outboundupper x="<<outboundupper.x<<",y="<<outboundupper.y<<std::endl;
             std::cout<<"outboundlower x="<<outboundlower.x<<",y="<<outboundlower.y<<std::endl;
-            unsigned int newimagewidth=this->nppinputimage.width()+(outboundupper.x>=this->nppinputimage.width())*std::abs(outboundupper.x)+(outboundupper.x<this->nppinputimage.width())*0\ 
+            unsigned int newimagewidth=this->nppinputimage.width()+(outboundupper.x>=this->nppinputimage.width())*std::abs(outboundupper.x-(int)this->nppinputimage.width())+(outboundupper.x<this->nppinputimage.width())*0\ 
                                       +(outboundlower.x<=0)*std::abs(outboundlower.x)+(outboundlower.x>0)*0;
 
-            unsigned int newimageheight=this->nppinputimage.height()+(outboundupper.y>=this->nppinputimage.height())*std::abs(outboundupper.y)+(outboundupper.y>this->nppinputimage.height())*0\ 
+            unsigned int newimageheight=this->nppinputimage.height()+(outboundupper.y>=this->nppinputimage.height())*std::abs(outboundupper.y-(int)this->nppinputimage.height())+(outboundupper.y>this->nppinputimage.height())*0\ 
                                       +(outboundlower.y<=0)*std::abs(outboundlower.y)+(outboundlower.y>0)*0;
 
             //if (targetmaxcorrposition.x+addedimage.nppinputimage.width()>this->nppinputimage.width()) offsetsizex +=std::abs(targetmaxcorrposition.x+addedimage.nppinputfile.width()-this->nppinputimage.width());

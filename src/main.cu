@@ -21,10 +21,10 @@ int main(){
     size_t free, total;
     cudaMemGetInfo(&free,&total);
     std::cout<<"free="<<free<<",total="<<total<<std::endl;
-    astrojpg_rgb_<Npp8u> image1("Orion/orion_20.jpg");
+    astrojpg_rgb_<Npp8u> image1("testimage/orion_1.jpg");
     std::cout<<image1.nppinputimage.width()<<","<<image1.nppinputimage.height();
     std::vector<std::string> files;
-    listfiles("/mnt/sdd/cudamosaic/Orion/",files);
+    listfiles("/mnt/sdd/cudamosaic/testimage/",files);
     std::stable_sort(files.begin(), files.end());
     std::cout<<files[1]<<std::endl;
     //for (auto filename: files) std::cout<<filename<<std::endl;
@@ -65,7 +65,7 @@ int main(){
 
     /*We need to load a new  image */
     std::cout<<"Am I here 2"<<std::endl;
-    astrojpg_rgb_<Npp8u> image2("Orion/orion_1.jpg");
+    astrojpg_rgb_<Npp8u> image2("testimage/orion_1.jpg");
     std::cout<<"Am I here 3"<<std::endl;
     image2.getgreyimage();
     
@@ -78,7 +78,7 @@ int main(){
     saveastro<Npp8u,1>(image2.correlationimage,"correlationexample.jpg");
     image2.getmaxpixel(image2.correlationimage,image2.maxcorrposition,maxbuffer);
     std::cout<<"Maximum corr pixel: x="<<image2.maxcorrposition.x<<",y="<<image2.maxcorrposition.y<<std::endl;
-    astrojpg_rgb_<Npp8u> image3("Orion/orion_4.jpg");
+    astrojpg_rgb_<Npp8u> image3("testimage/orion_4.jpg");
     image3.getgreyimage();
     image3.getsignalimage(image3.nppgreyimage,threshold);
     image3.Correlationimage(image1.maskimage,sumbuffer);
@@ -89,7 +89,7 @@ int main(){
     /*Create a new function for mosaicing the stuff*/
     int differencex,differencey;
     
-    astrojpg_rgb_<Npp32f> imagetotal("Orion/orion_1.jpg");
+    astrojpg_rgb_<Npp32f> imagetotal("testimage/orion_1.jpg");
     imagetotal.getgreyimage();
     imagetotal.getsignalimage(imagetotal.nppgreyimage,threshold);
     imagetotal.Correlationimage(image1.maskimage,sumbuffer);
@@ -125,8 +125,8 @@ int main(){
         cudaDeviceSynchronize();
         //std::string iterstack="finalresult_"+std::to_string(i)+".jpg";
         //saveastro<Npp32f,3>(imagetotal.nppinputimage,iterstack);
-        std::string iterexp="finalexp_"+std::to_string(i)+".jpg";
-        saveastro<Npp32f,1>(imagetotal.exposuremap,iterexp);
+        //std::string iterexp="finalexp_"+std::to_string(i)+".jpg";
+        //saveastro<Npp32f,1>(imagetotal.exposuremap,iterexp);
         i++;
     }
     
