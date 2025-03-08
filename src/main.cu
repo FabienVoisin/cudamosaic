@@ -4,7 +4,9 @@
 #include <vector>
 #include <string>
 #include <filesystem>
-
+#include "optionsparser.h"
+extern std::string directorypath;
+extern std::string outputfilename;
 void listfiles(std::string directorypath,std::vector<std::string> &list_of_files){
     for (const auto& entry : std::filesystem::directory_iterator(directorypath)) {
         std::filesystem::path outfilename = entry.path();
@@ -14,7 +16,7 @@ void listfiles(std::string directorypath,std::vector<std::string> &list_of_files
     }
 }
 
-int main(){
+int main(int argc, char ** argv){
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, 0);
     cudaMemPool_t memPool;
@@ -22,7 +24,12 @@ int main(){
     cudaMemGetInfo(&free,&total);
     std::cout<<"free="<<free<<",total="<<total<<std::endl;
     std::vector<std::string> files;
-    listfiles("/mnt/sdd/cudamosaic/testimage/",files);
+    optionparser(argc, argv);
+    if (directorypath.empty()){
+        std::cout<<"Input directory has not been mentioned"<<std::endl;
+        exit(1);
+    }
+    listfiles(directorypath,files);
     std::stable_sort(files.begin(), files.end());
     astrojpg_rgb_<Npp8u> image1(files[0]);
     std::cout<<image1.nppinputimage.width()<<","<<image1.nppinputimage.height();
@@ -111,7 +118,7 @@ int main(){
     //std::cout<<"diff="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
     //cv::Point_<int> offsetposition={differencex,differencey};
     //imagetotal.stackimage(image3,offsetposition);
-    saveastro<Npp32f,3>(imagetotal.nppinputimage,"finalresult.jpg");
+    saveastro<Npp32f,3>(imagetotal.nppinputimage,outputfilename);
     saveastro<Npp32f,1>(imagetotal.exposuremap,"finalresultexp.jpg");
     return 0;
 }
