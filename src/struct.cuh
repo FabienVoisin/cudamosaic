@@ -70,6 +70,7 @@ class Nppop{
         //NPP_ASSERT(cudaSuccess == eResult);
         /*nppiMirror will flip the image so that the last values become the first, necessary for the convolution*/
         status=nppiMirror_8u_C1R(outputROIimage.data(),(int)outputROIimage.pitch(), outputmirrorimage.data(),(int)outputmirrorimage.pitch(), osizeROI, NPP_BOTH_AXIS);
+        cudaDeviceSynchronize();
         std::cout<<"mirror status="<<status<<std::endl;
         /*Finally we need to convert to 32s*/
         status=nppiConvert_8u32s_C1R(outputmirrorimage.data(),outputmirrorimage.pitch(),outputfinalimage.data(),outputfinalimage.pitch(),osizeROI);
@@ -101,11 +102,12 @@ class Nppop{
         std::cout<<"cudaerr="<<err<<std::endl;
         Npp32s ndivisor=(Npp32s) hostnsum;
         
+        
         nppifilter(signalimage,outputimage,osizeROI,maskimage,okernelSize,oAnchor,ndivisor);
         //status=nppiFilter_8u_C1R(this->signalimage.data(), this->signalimage.pitch(), outputimage.data(), outputimage.pitch(),osizeROI, maskimage.data(), okernelSize, oAnchor,  ndivisor);
         //NPP_ASSERT(NPP_SUCCESS  == status);
         cudaDeviceSynchronize();
-        std::cout<<"outputimage:width="<<outputimage.width()<<",height="<<outputimage.height()<<std::endl;
+        //td::cout<<"outputimage:width="<<outputimage.width()<<",height="<<outputimage.height()<<std::endl;
         this->correlationimage=outputimage;
         //nppiFree((void*)maskimagesum.data());
     }
@@ -115,22 +117,23 @@ class Nppop{
 
     template<typename D2, unsigned int N2>
     void resizeimage(npp::ImageNPP<D2,N2> &inputimage,unsigned int newimagewidth, unsigned int newimageheight,cv::Point_<int> imageposition){
+        std::cout<<"newimage width="<<newimagewidth<<", height="<<newimageheight<<std::endl;
         npp::ImageNPP<D2,N2> tempimage(newimagewidth,newimageheight);
         unsigned int offsetpositionx=(imageposition.x>=0)*imageposition.x+(imageposition.x<0)*0;
-        unsigned int offsetpositiony=(imageposition.y>=0)*imageposition.y+(imageposition.y<0)*0;
-        
+        unsigned int offsetpositiony=(imageposition.y>=0)*imageposition.y+(imageposition.x<0)*0;
+        std::cout<<"offsetposition="<<offsetpositionx<<","<<offsetpositiony<<std::endl;
         
         cudaError_t eResult;
         if (std::is_same<D2,Npp8u>::value){
            switch(N2){
                 case 1:
                 eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp8u),inputimage.height(),cudaMemcpyDeviceToDevice);
-                
+                std::cout<<"eresult="<<eResult<<std::endl;
                 break;
                 case 3:
                /*Need to multiply the width by 3 to include the number of channels*/
                 eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp8u)*3,inputimage.height(),cudaMemcpyDeviceToDevice);
-                
+                std::cout<<"eresult="<<eResult<<std::endl;
                 break;
             }
         }
@@ -138,12 +141,12 @@ class Nppop{
             switch(N2){
                  case 1:
                  eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp32s),inputimage.height(),cudaMemcpyDeviceToDevice);
-                 
+                 std::cout<<"eresult="<<eResult<<std::endl;
                  break;
                  case 3:
                 /*Need to multiply the width by 3 to include the number of channels*/
                  eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp32s)*3,inputimage.height(),cudaMemcpyDeviceToDevice);
-                 
+                 std::cout<<"eresult="<<eResult<<std::endl;
                  break;
              }
         }
@@ -151,10 +154,12 @@ class Nppop{
             switch(N2){
                  case 1:
                  eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp32f),inputimage.height(),cudaMemcpyDeviceToDevice);
+                 std::cout<<"eresult="<<eResult<<std::endl;
                  break;
                  case 3:
                 /*Need to multiply the width by 3 to include the number of channels*/
                  eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp32f)*3,inputimage.height(),cudaMemcpyDeviceToDevice);
+                 std::cout<<"eresult="<<eResult<<std::endl;
                  break;
              }
      }
@@ -171,6 +176,7 @@ class Nppop{
 
     template<typename D2, unsigned int N2>
     void addimage(npp::ImageNPP<D2,N2> &inputimage,npp::ImageNPP<D2,N2> &extimage, cv::Point_<int> imageposition){
+        
         unsigned int offsetpositionx=(imageposition.x<0)*std::abs(imageposition.x)+(imageposition.x>=0)*0;
         unsigned int offsetpositiony=(imageposition.y<0)*std::abs(imageposition.y)+(imageposition.y>=0)*0;
         npp::ImageNPP<D2,N2> tempimage(inputimage.width(),inputimage.height()); //get the same size properties of input data (previously updated through resize)
@@ -189,11 +195,11 @@ class Nppop{
         NppStatus status;
         switch(N2){
             case 3:
-                status=nppiAdd_32f_C3R(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(offsetpositionx,offsetpositiony), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI);
+                status=nppiAdd_32f_C3R(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI);
                 
                 break;
             case 1:
-                status=nppiAdd_32f_C1R(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(offsetpositionx,offsetpositiony), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI);
+                status=nppiAdd_32f_C1R(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI);
                 
                 break;
         }        
@@ -205,26 +211,29 @@ class Nppop{
         NppStatus status;
         switch(N2){
             case 1: 
-                    nppiAdd_8u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(offsetpositionx,offsetpositiony), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    nppiAdd_8u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
                     break;
             case 3:
-                    nppiAdd_8u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(offsetpositionx,offsetpositiony), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    nppiAdd_8u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(), tempimage.pitch(offsetpositionx,offsetpositiony), AddROI, 1);
                     break;    
         }        
 
     }
     void nppifilter(npp::ImageNPP_8u_C1 &signalimage,npp::ImageNPP_8u_C1 &outputimage,NppiSize osizeROI,npp::ImageNPP_32s_C1 &maskimage, NppiSize okernelSize, NppiPoint oAnchor, Npp32s ndivisor){
         NppStatus status;
-        status=nppiFilter_8u_C1R(signalimage.data(), signalimage.pitch(), outputimage.data(), outputimage.pitch(),osizeROI, maskimage.data(), okernelSize, oAnchor,  ndivisor);
+        NppiPoint oSrcoffset={0,0};
+        //status=nppiFilter_8u_C1R(signalimage.data(), signalimage.pitch(), outputimage.data(), outputimage.pitch(),osizeROI, maskimage.data(), okernelSize, oAnchor, ndivisor);
+        status=nppiFilterBorder_8u_C1R(signalimage.data(), signalimage.pitch(),osizeROI,oSrcoffset, outputimage.data(), outputimage.pitch(),osizeROI, maskimage.data(), okernelSize, oAnchor, ndivisor,NPP_BORDER_REPLICATE);
         std::cout<<"Filter status="<<status<<std::endl;
     }
 
     void nppifilter(npp::ImageNPP_32f_C1 &signalimage,npp::ImageNPP_32f_C1 &outputimage,NppiSize osizeROI,npp::ImageNPP_32s_C1 &maskimage, NppiSize okernelSize, NppiPoint oAnchor, Npp32s ndivisor){
         npp::ImageNPP_32f_C1 maskfloat(maskimage.size());
+        NppiPoint oSrcoffset={0,0};
         std::cout<<"testtonight5b"<<std::endl;
         nppiConvert_32s32f_C1R(maskimage.data(), maskimage.pitch(), maskfloat.data(), maskfloat.pitch(), okernelSize);
         std::cout<<"testtonight6b"<<std::endl;
-        nppiFilter_32f_C1R(signalimage.data(), signalimage.pitch(), outputimage.data(), outputimage.pitch(),osizeROI, maskfloat.data(), okernelSize, oAnchor);
+        nppiFilterBorder_32f_C1R(signalimage.data(), signalimage.pitch(), osizeROI,oSrcoffset, outputimage.data(), outputimage.pitch(),osizeROI, maskfloat.data(), okernelSize, oAnchor,NPP_BORDER_REPLICATE);
         std::cout<<"testtonight6c"<<std::endl;
     } 
 
@@ -306,12 +315,35 @@ class astrojpg_rgb_ : public Nppop<D, 3>
 
 
         /*I need to add exposure based on the ROI from the reference and target image auto-correlation */
-        void stackimage(astrojpg_rgb_<Npp8u> &addedimage,cv::Point_<int> targetmaxcorrposition){
+        void stackimage(astrojpg_rgb_<Npp8u> &addedimage){
             NppStatus status;
-            unsigned int newimagewidth=this->nppinputimage.width()+std::abs(targetmaxcorrposition.x);
-            unsigned int newimageheight=this->nppinputimage.height()+std::abs(targetmaxcorrposition.y);
+            
+            unsigned int offsetsizex=0;
+            cv::Point_<int> offsetposition;
+            cv::Point_<int> outboundupper;
+            cv::Point_<int> outboundlower;
+
+            offsetposition.x=addedimage.maxcorrposition.x-this->maxcorrposition.x;
+            offsetposition.y=addedimage.maxcorrposition.y-this->maxcorrposition.y;
+
+            outboundlower=-offsetposition;
+            outboundupper.x=outboundlower.x+addedimage.nppinputimage.width();
+            outboundupper.y=outboundlower.y+addedimage.nppinputimage.height();
+            
+            
+            std::cout<<"outboundupper x="<<outboundupper.x<<",y="<<outboundupper.y<<std::endl;
+            std::cout<<"outboundlower x="<<outboundlower.x<<",y="<<outboundlower.y<<std::endl;
+            unsigned int newimagewidth=this->nppinputimage.width()+(outboundupper.x>=this->nppinputimage.width())*std::abs(outboundupper.x-(int)this->nppinputimage.width())+(outboundupper.x<this->nppinputimage.width())*0\ 
+                                      +(outboundlower.x<=0)*std::abs(outboundlower.x)+(outboundlower.x>0)*0;
+
+            unsigned int newimageheight=this->nppinputimage.height()+(outboundupper.y>=this->nppinputimage.height())*std::abs(outboundupper.y-(int)this->nppinputimage.height())+(outboundupper.y>this->nppinputimage.height())*0\ 
+                                      +(outboundlower.y<=0)*std::abs(outboundlower.y)+(outboundlower.y>0)*0;
+
+            //if (targetmaxcorrposition.x+addedimage.nppinputimage.width()>this->nppinputimage.width()) offsetsizex +=std::abs(targetmaxcorrposition.x+addedimage.nppinputfile.width()-this->nppinputimage.width());
+            //if (targetmaxcorrposition.x+2*this->nppinputimage.maxcorrposition.x-addedimage.nppinputimage.width()<0) offsetsizex +=std::abs(targetmaxcorrposition.x+2*this->nppinputimage.maxcorrposition.x-addedimage.nppinputfile.width());
+
             std::cout<<"newsize="<<newimagewidth<<","<<newimageheight<<std::endl;
-            resize(newimagewidth,newimageheight,targetmaxcorrposition);
+            resize(newimagewidth,newimageheight,offsetposition);
             
             /*I then need to create a 32f value of the targetimage*/
             NppiSize convertimageROI={(int)addedimage.nppinputimage.width(),(int)addedimage.nppinputimage.height()};
@@ -321,12 +353,13 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             status=nppiConvert_8u32f_C3R(addedimage.nppinputimage.data(), addedimage.nppinputimage.pitch(), converted32faddedimage.data(), converted32faddedimage.pitch(), convertimageROI);
             //std::cout<<"statusconvert="<<status<<std::endl;
             std::cout<<"anothergo0"<<std::endl;
-            Nppop<D,3>::template addimage<D,3>(this->nppinputimage,converted32faddedimage,targetmaxcorrposition);
+            Nppop<D,3>::template addimage<D,3>(this->nppinputimage,converted32faddedimage,offsetposition);
+            std::cout<<"Last test bis"<<std::endl;
             addexposure(this->nppinputimage);
             /* Now add values from other image properties */
             npp::ImageNPP<Npp32f,1> converted32faddedgreyimage(addedimage.nppgreyimage.size());
             nppiConvert_8u32f_C1R(addedimage.nppgreyimage.data(), addedimage.nppgreyimage.pitch(),converted32faddedgreyimage.data(),converted32faddedgreyimage.pitch(),convertimageROI);
-            Nppop<D,3>::template addimage<D,1>(this->nppgreyimage,converted32faddedgreyimage,targetmaxcorrposition);
+            Nppop<D,3>::template addimage<D,1>(this->nppgreyimage,converted32faddedgreyimage,offsetposition);
 
         }
         /*I need to first use the previous exposure map and add it onto the new map with the specific offset*/
@@ -356,16 +389,23 @@ class astrojpg_rgb_ : public Nppop<D, 3>
         }
 
         void addexposure(npp::ImageNPP_8u_C3 &nppinputfile){
-            npp::ImageNPP_8u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+            if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
+                npp::ImageNPP_8u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+                this->exposuremap=tempexposuremap;
+            }
+            
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_8u_C1IRSfs(100,tempexposuremap.data(), (int)tempexposuremap.pitch(),osizeROI,1);
-            this->exposuremap=tempexposuremap;
+            nppiAddC_8u_C1IRSfs(1,this->exposuremap.data(), (int)this->exposuremap.pitch(),osizeROI,1);
+            
         }
         void addexposure(npp::ImageNPP_32f_C3 &nppinputfile){
-            npp::ImageNPP_32f_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+            if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
+                npp::ImageNPP_32f_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+                this->exposuremap=tempexposuremap;
+            }
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_32f_C1IR(100,tempexposuremap.data(), (int)tempexposuremap.pitch(),osizeROI);
-            this->exposuremap=tempexposuremap;
+            nppiAddC_32f_C1IR(1,this->exposuremap.data(), (int)this->exposuremap.pitch(),osizeROI);
+            
         }
 
 };

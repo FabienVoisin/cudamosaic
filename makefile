@@ -9,9 +9,11 @@ default: mosaic
 src/main.o:	src/main.cu
 	$(CC) -c $(INCLUDE) -o $@ $< $(LIBS)
 
+src/optionsparser.o:	src/optionsparser.cpp
+	$(CC) -c $(INCLUDE) -o $@ $< $(LIBS)
 
-mosaic:	 src/main.o
-	$(CC) $(INCLUDE) -o $@  src/main.o $(LIBS) 
+mosaic:	 src/main.o src/optionsparser.o
+	$(CC) $(INCLUDE) -o $@  src/main.o src/optionsparser.o $(LIBS) 
 
 
 clean: 
