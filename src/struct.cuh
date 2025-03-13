@@ -187,6 +187,13 @@ class Nppop{
         
     }
 
+    template<typename D2, unsigned int N2>
+    void normaliseimage(npp::ImageNPP<D2,N2> &inputimage){
+        /*This function will divice the input image with the exposure map */
+        npp::ImageNPP<D2,N2> outputimage(inputimage.width(),inputimage.height()); 
+        nppidivide<N2>(inputimage, this->exposuremap,outputimage);
+        inputimage=outputimage;
+    }
 
     private:
     template<unsigned int N2>
@@ -219,6 +226,35 @@ class Nppop{
         }        
 
     }
+    template <unsigned int N2>
+    void nppidivide(npp::ImageNPP<Npp32f,N2> &inputimage, npp::ImageNPP<Npp32f,1> &exposuremap,npp::ImageNPP<Npp32f,N2> &outputimage){
+        NppiSize divROI={inputimage.width(),inputimage.height()};
+        switch(N2){
+            case 1:
+                nppiDiv_32f_C1R(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI);
+                break;
+            case 3:
+                std::cout<<"testnormalisation"<<std::endl;
+                nppiDiv_32f_C3R(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI);
+                break;
+        }
+        
+    }
+
+    template <unsigned int N2>
+    void nppidivide(npp::ImageNPP<Npp8u,N2> &inputimage, npp::ImageNPP<Npp8u,1> &exposuremap,npp::ImageNPP<Npp8u,N2> &outputimage){
+        NppiSize divROI={inputimage.width(),inputimage.height()};
+        switch(N2){
+            case 1:
+                nppiDiv_8u_C1RSfs(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                break;
+            case 3:
+                nppiDiv_32f_C3RSfs(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                break;
+        }
+        
+    }
+
     void nppifilter(npp::ImageNPP_8u_C1 &signalimage,npp::ImageNPP_8u_C1 &outputimage,NppiSize osizeROI,npp::ImageNPP_32s_C1 &maskimage, NppiSize okernelSize, NppiPoint oAnchor, Npp32s ndivisor){
         NppStatus status;
         NppiPoint oSrcoffset={0,0};
@@ -257,6 +293,7 @@ class Nppop{
     void nppicompare(npp::ImageNPP_32f_C1 &nppgreyimage,npp::ImageNPP_8u_C1 &nppdestfile,Npp32f threshold, NppiSize osizeROI){
         nppiCompareC_32f_C1R(nppgreyimage.data(),(int)nppgreyimage.pitch(), threshold, nppdestfile.data(),(int)nppdestfile.pitch(),osizeROI,NPP_CMP_GREATER_EQ);
     }
+    
 };
 
 

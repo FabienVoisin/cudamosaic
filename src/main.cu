@@ -118,7 +118,8 @@ int main(int argc, char ** argv){
     //std::cout<<"diff="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
     //cv::Point_<int> offsetposition={differencex,differencey};
     //imagetotal.stackimage(image3,offsetposition);
-    saveastro<Npp32f,3>(imagetotal.nppinputimage,outputfilename);
+    imagetotal.normaliseimage<Npp32f,3>(imagetotal.nppinputimage);
+    saveastro<Npp32f,3>(imagetotal.nppinputimage,outputfilename);    
     saveastro<Npp32f,1>(imagetotal.exposuremap,"finalresultexp.jpg");
     return 0;
 }
