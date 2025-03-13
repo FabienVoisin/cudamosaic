@@ -284,7 +284,7 @@ class astrojpg_rgb_ : public Nppop<D, 3>
         setinputNPP(nppinputfile,this->nppinputimage);
         
         /*I need to add the exposure initialisation*/
-        addexposure(this->nppinputimage);
+        addexposure(this->nppinputimage,{0,0});
         }
 
         astrojpg_rgb_(unsigned int imagewidth, unsigned int imageheight):
@@ -355,7 +355,7 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             std::cout<<"anothergo0"<<std::endl;
             Nppop<D,3>::template addimage<D,3>(this->nppinputimage,converted32faddedimage,offsetposition);
             std::cout<<"Last test bis"<<std::endl;
-            addexposure(this->nppinputimage);
+            addexposure(converted32faddedimage,offsetposition);
             /* Now add values from other image properties */
             npp::ImageNPP<Npp32f,1> converted32faddedgreyimage(addedimage.nppgreyimage.size());
             nppiConvert_8u32f_C1R(addedimage.nppgreyimage.data(), addedimage.nppgreyimage.pitch(),converted32faddedgreyimage.data(),converted32faddedgreyimage.pitch(),convertimageROI);
@@ -388,23 +388,26 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             nppiRGBToGray_32f_C3C1R(this->nppinputimage.data(), this->nppinputimage.pitch(), nppgreyfile.data(), nppgreyfile.pitch(),osizeROI);
         }
 
-        void addexposure(npp::ImageNPP_8u_C3 &nppinputfile){
+        void addexposure(npp::ImageNPP_8u_C3 &nppinputfile,cv::Point_<int> offsetposition){
             if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
                 npp::ImageNPP_8u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
                 this->exposuremap=tempexposuremap;
             }
-            
+            unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
+            unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_8u_C1IRSfs(1,this->exposuremap.data(), (int)this->exposuremap.pitch(),osizeROI,1);
+            nppiAddC_8u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,1);
             
         }
-        void addexposure(npp::ImageNPP_32f_C3 &nppinputfile){
+        void addexposure(npp::ImageNPP_32f_C3 &nppinputfile,cv::Point_<int> offsetposition){
             if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
                 npp::ImageNPP_32f_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
                 this->exposuremap=tempexposuremap;
             }
+            unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
+            unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_32f_C1IR(1,this->exposuremap.data(), (int)this->exposuremap.pitch(),osizeROI);
+            nppiAddC_32f_C1IR(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI);
             
         }
 
