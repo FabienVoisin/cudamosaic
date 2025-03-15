@@ -32,20 +32,20 @@ class Nppop{
         //nppiCompareC_8u_C1R(nppgreyimage.data(),(int)nppgreyimage.pitch(), threshold, nppdestfile.data(),(int)nppdestfile.pitch(),osizeROI,NPP_CMP_GREATER_EQ);
         this->signalimage=nppdestfile;
     }
-
-    void getmaxpixel(npp::ImageNPP_8u_C1 &image,cv::Point_<int> &maxpixelposition, Npp8u *maxbuffer){
+    template <typename D2>
+    void getmaxpixel(npp::ImageNPP<D2,1> &image,cv::Point_<int> &maxpixelposition, Npp8u *maxbuffer){
         int *positionx, *positiony; //device values
         cudaError_t eresult;
         //host values to return
-        Npp8u *nppmaxvalues;
+        D2 *nppmaxvalues;
         NppiSize osizeROI={(int)image.width(),(int)image.height()};
-        Npp8u hostmaxvalues;
-        eresult=cudaMalloc((void**)&nppmaxvalues, sizeof(Npp8u) * 1);
+        D2 hostmaxvalues;
+        eresult=cudaMalloc((void**)&nppmaxvalues, sizeof(D2) * 1);
         eresult=cudaMalloc((void**)&positionx,sizeof(int));
         eresult=cudaMalloc((void**)&positiony,sizeof(int));
         nppimaxidx(image,osizeROI,maxbuffer,nppmaxvalues,positionx,positiony);
         
-        eresult=cudaMemcpy(&hostmaxvalues,nppmaxvalues,sizeof(Npp8u)*1,cudaMemcpyDeviceToHost);
+        eresult=cudaMemcpy(&hostmaxvalues,nppmaxvalues,sizeof(D2)*1,cudaMemcpyDeviceToHost);
         eresult=cudaMemcpy(&(maxpixelposition.x),positionx,sizeof(int),cudaMemcpyDeviceToHost);
         eresult=cudaMemcpy(&(maxpixelposition.y),positiony,sizeof(int),cudaMemcpyDeviceToHost);      
         
@@ -53,6 +53,7 @@ class Nppop{
         cudaFree(positionx);
         cudaFree(positiony);
     }
+
 
     void createROIdata(int squaresize){
         NppiSize osizeROI={squaresize,squaresize}; //Setup the osizeROI
@@ -387,6 +388,7 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             //std::cout<<targetmaxcorrposition.x<<","<<targetmaxcorrposition.y<<std::endl;
 
             npp::ImageNPP<Npp32f,3> converted32faddedimage(addedimage.nppinputimage.size());
+            //status=nppiConvert_8u32f_C3R(addedimage.nppinputimage.data(), addedimage.nppinputimage.pitch(), converted32faddedimage.data(), converted32faddedimage.pitch(), convertimageROI);
             status=nppiConvert_8u32f_C3R(addedimage.nppinputimage.data(), addedimage.nppinputimage.pitch(), converted32faddedimage.data(), converted32faddedimage.pitch(), convertimageROI);
             //std::cout<<"statusconvert="<<status<<std::endl;
             std::cout<<"anothergo0"<<std::endl;
@@ -408,9 +410,19 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             npp::ImageNPP_32f_C3 nppconvertedfile(nppinputfile.width(),nppinputfile.height());
                 /*We need to convert from 8u to 32s*/
             NppiSize convertsizeROI={nppinputfile.width(),nppinputfile.height()};
-            nppiConvert_8u32f_C3R(nppinputfile.data(), nppinputfile.pitch(), nppconvertedfile.data(), nppconvertedfile.pitch(),convertsizeROI);
+            //nppiConvert_8u32f_C3R(nppinputfile.data(), nppinputfile.pitch(), nppconvertedfile.data(), nppconvertedfile.pitch(),convertsizeROI);
+            nppiConvert_8u32f_C1R(nppinputfile.data(), (int)nppinputfile.pitch(), nppconvertedfile.data(), (int)nppconvertedfile.pitch() , convertsizeROI);
             nppinputimage=nppconvertedfile;
         }
+
+        /*void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_32s_C3 &nppinputimage){
+            npp::ImageNPP_32s_C3 nppconvertedfile(nppinputfile.width(),nppinputfile.height());
+                /*We need to convert from 8u to 32s
+            NppiSize convertsizeROI={nppinputfile.width(),nppinputfile.height()};
+            nppiConvert_8u32s_C3R(nppinputfile.data(), nppinputfile.pitch(), nppconvertedfile.data(), nppconvertedfile.pitch(),convertsizeROI);
+            nppinputimage=nppconvertedfile;
+        }*/
+
         void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_8u_C3 &nppinputimage){
             nppinputimage=nppinputfile;
         }

@@ -112,14 +112,20 @@ int main(int argc, char ** argv){
         //saveastro<Npp32f,3>(imagetotal.nppinputimage,iterstack);
         //std::string iterexp="finalexp_"+std::to_string(i)+".jpg";
         //saveastro<Npp32f,1>(imagetotal.exposuremap,iterexp);
+        std::cout<<"filename="<<file<<std::endl;
+        printastro<Npp32f,1>(imagetotal.nppgreyimage,{1,1000},{3000,4000});
         i++;
     }
     
     //std::cout<<"diff="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
     //cv::Point_<int> offsetposition={differencex,differencey};
     //imagetotal.stackimage(image3,offsetposition);
-    imagetotal.normaliseimage<Npp32f,3>(imagetotal.nppinputimage);
-    saveastro<Npp32f,3>(imagetotal.nppinputimage,outputfilename);    
+    imagetotal.normaliseimage<Npp32f,1>(imagetotal.nppgreyimage);
+    //cv::Point_<int> finalmax;
+    //imagetotal.getmaxpixel(imagetotal.nppgreyimage,finalmax,maxbuffer);
+    std::cout<<"maxpos="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
+    
+    saveastro<Npp32f,1>(imagetotal.nppgreyimage,outputfilename);    
     saveastro<Npp32f,1>(imagetotal.exposuremap,"finalresultexp.jpg");
     return 0;
 }
