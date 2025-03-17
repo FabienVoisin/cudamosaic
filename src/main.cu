@@ -38,6 +38,7 @@ int main(int argc, char ** argv){
     std::cout<<files[1]<<std::endl;
     //for (auto filename: files) std::cout<<filename<<std::endl;
     image1.getgreyimage(); //get the grey image 
+    //printastro<Npp8u,3>(image1.nppinputimage,{1,1},{image1.nppinputimage.width()-1,image1.nppinputimage.height()-1});
     Npp8u* maxbuffer;
     Npp8u* sumbuffer;
     size_t  maxbufferhostsize;
@@ -75,10 +76,14 @@ int main(int argc, char ** argv){
     int differencex,differencey;
     
     astrojpg_rgb_<Npp32f> imagetotal(files[1]);
+    std::cout<<files[1]<<std::endl;
     imagetotal.getgreyimage();
     imagetotal.getsignalimage(imagetotal.nppgreyimage,threshold);
     imagetotal.Correlationimage(image1.maskimage,sumbuffer);
     imagetotal.getmaxpixel(imagetotal.correlationimage,imagetotal.maxcorrposition,maxbuffer);
+    //printastro<Npp32f,3>(imagetotal.nppinputimage,{1,1},{imagetotal.nppgreyimage.width()-1,imagetotal.nppgreyimage.height()-1});
+    saveastro<Npp8u,1>(imagetotal.signalimage,"singleimage.png");
+    std::cout<<"imagetotalcorrpos="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
     cudaDeviceSynchronize();
     std::cout<<"am i here now"<<std::endl;
     cudaMemGetInfo(&free,&total);
@@ -113,7 +118,7 @@ int main(int argc, char ** argv){
         //std::string iterexp="finalexp_"+std::to_string(i)+".jpg";
         //saveastro<Npp32f,1>(imagetotal.exposuremap,iterexp);
         std::cout<<"filename="<<file<<std::endl;
-        printastro<Npp32f,1>(imagetotal.nppgreyimage,{1,1000},{3000,4000});
+        //printastro<Npp32s,1>(imagetotal.nppgreyimage,{1,1},{imagetotal.nppgreyimage.width()-1,imagetotal.nppgreyimage.height()-1});
         i++;
     }
     
@@ -124,7 +129,8 @@ int main(int argc, char ** argv){
     //cv::Point_<int> finalmax;
     //imagetotal.getmaxpixel(imagetotal.nppgreyimage,finalmax,maxbuffer);
     std::cout<<"maxpos="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
-    
+    //printastro<Npp32f,3>(imagetotal.nppinputimage,{1,1},{imagetotal.nppinputimage.width()-1,imagetotal.nppinputimage.height()-1});
+    printastro<Npp32f,1>(imagetotal.nppgreyimage,{1,1},{imagetotal.nppgreyimage.width()-1,imagetotal.nppgreyimage.height()-1});
     saveastro<Npp32f,1>(imagetotal.nppgreyimage,outputfilename);    
     saveastro<Npp32f,1>(imagetotal.exposuremap,"finalresultexp.jpg");
     return 0;

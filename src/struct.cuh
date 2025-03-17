@@ -138,15 +138,15 @@ class Nppop{
                 break;
             }
         }
-        else if (std::is_same<D2,Npp32s>::value){
+        else if (std::is_same<D2,Npp16u>::value){
             switch(N2){
                  case 1:
-                 eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp32s),inputimage.height(),cudaMemcpyDeviceToDevice);
+                 eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp16u),inputimage.height(),cudaMemcpyDeviceToDevice);
                  std::cout<<"eresult="<<eResult<<std::endl;
                  break;
                  case 3:
                 /*Need to multiply the width by 3 to include the number of channels*/
-                 eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp32s)*3,inputimage.height(),cudaMemcpyDeviceToDevice);
+                 eResult=cudaMemcpy2D(tempimage.data(offsetpositionx,offsetpositiony),tempimage.pitch(),inputimage.data(),inputimage.pitch(),inputimage.width()*sizeof(Npp16u)*3,inputimage.height(),cudaMemcpyDeviceToDevice);
                  std::cout<<"eresult="<<eResult<<std::endl;
                  break;
              }
@@ -222,21 +222,36 @@ class Nppop{
                     nppiAdd_8u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
                     break;
             case 3:
-                    nppiAdd_8u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(), tempimage.pitch(offsetpositionx,offsetpositiony), AddROI, 1);
+                    nppiAdd_8u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
                     break;    
         }        
 
+    
     }
+    template<unsigned int N2>
+    void nppiadd(npp::ImageNPP<Npp16u,N2> &inputimage, npp::ImageNPP<Npp16u,N2> &extimage, npp::ImageNPP<Npp16u,N2> &tempimage,unsigned int offsetpositionx, unsigned int offsetpositiony){
+        NppiSize AddROI={extimage.width(),extimage.height()};
+        NppStatus status;
+        switch(N2){
+            case 1: 
+                    nppiAdd_16u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    break;
+            case 3:
+                    nppiAdd_16u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    break;    
+        }
+    }
+
     template <unsigned int N2>
     void nppidivide(npp::ImageNPP<Npp32f,N2> &inputimage, npp::ImageNPP<Npp32f,1> &exposuremap,npp::ImageNPP<Npp32f,N2> &outputimage){
         NppiSize divROI={inputimage.width(),inputimage.height()};
         switch(N2){
             case 1:
-                nppiDiv_32f_C1R(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI);
+                nppiDiv_32f_C1R(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI);
                 break;
             case 3:
                 std::cout<<"testnormalisation"<<std::endl;
-                nppiDiv_32f_C3R(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI);
+                nppiDiv_32f_C3R(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI);
                 break;
         }
         
@@ -247,10 +262,24 @@ class Nppop{
         NppiSize divROI={inputimage.width(),inputimage.height()};
         switch(N2){
             case 1:
-                nppiDiv_8u_C1RSfs(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                nppiDiv_8u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
                 break;
             case 3:
-                nppiDiv_32f_C3RSfs(inputimage.data(), inputimage.pitch(), exposuremap.data(), exposuremap.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                nppiDiv_8u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                break;
+        }
+        
+    }
+
+    template <unsigned int N2>
+    void nppidivide(npp::ImageNPP<Npp16u,N2> &inputimage, npp::ImageNPP<Npp16u,1> &exposuremap,npp::ImageNPP<Npp16u,N2> &outputimage){
+        NppiSize divROI={inputimage.width(),inputimage.height()};
+        switch(N2){
+            case 1:
+                nppiDiv_16u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                break;
+            case 3:
+                nppiDiv_16u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
                 break;
         }
         
@@ -295,6 +324,11 @@ class Nppop{
         nppiCompareC_32f_C1R(nppgreyimage.data(),(int)nppgreyimage.pitch(), threshold, nppdestfile.data(),(int)nppdestfile.pitch(),osizeROI,NPP_CMP_GREATER_EQ);
     }
     
+    void nppicompare(npp::ImageNPP_16u_C1 &nppgreyimage,npp::ImageNPP_8u_C1 &nppdestfile,Npp16u threshold, NppiSize osizeROI){
+        /*nppicompare does not exist in 32s, so I need to convert it to 32f first*/
+        nppiCompareC_16u_C1R(nppgreyimage.data(),(int)nppgreyimage.pitch(), threshold, nppdestfile.data(),(int)nppdestfile.pitch(),osizeROI,NPP_CMP_GREATER_EQ);
+        
+    }
 };
 
 
@@ -384,21 +418,22 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             resize(newimagewidth,newimageheight,offsetposition);
             
             /*I then need to create a 32f value of the targetimage*/
-            NppiSize convertimageROI={(int)addedimage.nppinputimage.width(),(int)addedimage.nppinputimage.height()};
             //std::cout<<targetmaxcorrposition.x<<","<<targetmaxcorrposition.y<<std::endl;
 
-            npp::ImageNPP<Npp32f,3> converted32faddedimage(addedimage.nppinputimage.size());
+            //npp::ImageNPP<Npp32f,3> converted32faddedimage(addedimage.nppinputimage.size());
+            npp::ImageNPP<D,3> convertedaddedimage(addedimage.nppinputimage.size());
+            convert8utoother<3>(addedimage.nppinputimage,convertedaddedimage);
             //status=nppiConvert_8u32f_C3R(addedimage.nppinputimage.data(), addedimage.nppinputimage.pitch(), converted32faddedimage.data(), converted32faddedimage.pitch(), convertimageROI);
-            status=nppiConvert_8u32f_C3R(addedimage.nppinputimage.data(), addedimage.nppinputimage.pitch(), converted32faddedimage.data(), converted32faddedimage.pitch(), convertimageROI);
             //std::cout<<"statusconvert="<<status<<std::endl;
             std::cout<<"anothergo0"<<std::endl;
-            Nppop<D,3>::template addimage<D,3>(this->nppinputimage,converted32faddedimage,offsetposition);
+            Nppop<D,3>::template addimage<D,3>(this->nppinputimage,convertedaddedimage,offsetposition);
             std::cout<<"Last test bis"<<std::endl;
-            addexposure(converted32faddedimage,offsetposition);
+            addexposure(convertedaddedimage,offsetposition);
             /* Now add values from other image properties */
-            npp::ImageNPP<Npp32f,1> converted32faddedgreyimage(addedimage.nppgreyimage.size());
-            nppiConvert_8u32f_C1R(addedimage.nppgreyimage.data(), addedimage.nppgreyimage.pitch(),converted32faddedgreyimage.data(),converted32faddedgreyimage.pitch(),convertimageROI);
-            Nppop<D,3>::template addimage<D,1>(this->nppgreyimage,converted32faddedgreyimage,offsetposition);
+            npp::ImageNPP<D,1> convertedaddedgreyimage(addedimage.nppgreyimage.size());
+            convert8utoother<1>(addedimage.nppgreyimage,convertedaddedgreyimage);
+            //nppiConvert_8u32f_C1R(addedimage.nppgreyimage.data(), addedimage.nppgreyimage.pitch(),converted32faddedgreyimage.data(),converted32faddedgreyimage.pitch(),convertimageROI);
+            Nppop<D,3>::template addimage<D,1>(this->nppgreyimage,convertedaddedgreyimage,offsetposition);
 
         }
         /*I need to first use the previous exposure map and add it onto the new map with the specific offset*/
@@ -408,20 +443,20 @@ class astrojpg_rgb_ : public Nppop<D, 3>
     private:
         void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_32f_C3 &nppinputimage){
             npp::ImageNPP_32f_C3 nppconvertedfile(nppinputfile.width(),nppinputfile.height());
-                /*We need to convert from 8u to 32s*/
+                /*We need to convert from 8u to 32f*/
             NppiSize convertsizeROI={nppinputfile.width(),nppinputfile.height()};
             //nppiConvert_8u32f_C3R(nppinputfile.data(), nppinputfile.pitch(), nppconvertedfile.data(), nppconvertedfile.pitch(),convertsizeROI);
-            nppiConvert_8u32f_C1R(nppinputfile.data(), (int)nppinputfile.pitch(), nppconvertedfile.data(), (int)nppconvertedfile.pitch() , convertsizeROI);
+            nppiConvert_8u32f_C3R(nppinputfile.data(), (int)nppinputfile.pitch(), nppconvertedfile.data(), (int)nppconvertedfile.pitch() , convertsizeROI);
             nppinputimage=nppconvertedfile;
         }
 
-        /*void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_32s_C3 &nppinputimage){
-            npp::ImageNPP_32s_C3 nppconvertedfile(nppinputfile.width(),nppinputfile.height());
-                /*We need to convert from 8u to 32s
+        void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_16u_C3 &nppinputimage){
+            npp::ImageNPP_16u_C3 nppconvertedfile(nppinputfile.width(),nppinputfile.height());
+                /*We need to convert from 8u to 32s*/
             NppiSize convertsizeROI={nppinputfile.width(),nppinputfile.height()};
-            nppiConvert_8u32s_C3R(nppinputfile.data(), nppinputfile.pitch(), nppconvertedfile.data(), nppconvertedfile.pitch(),convertsizeROI);
+            nppiConvert_8u16u_C3R(nppinputfile.data(),(int) nppinputfile.pitch(), nppconvertedfile.data(),(int) nppconvertedfile.pitch(),convertsizeROI);
             nppinputimage=nppconvertedfile;
-        }*/
+        }
 
         void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_8u_C3 &nppinputimage){
             nppinputimage=nppinputfile;
@@ -434,7 +469,14 @@ class astrojpg_rgb_ : public Nppop<D, 3>
 
         void rgbtogray(npp::ImageNPP_32f_C3 &nppinputimage, npp::ImageNPP_32f_C1 &nppgreyfile){
             NppiSize osizeROI={(int)nppinputimage.width(),(int)nppinputimage.height()};
-            nppiRGBToGray_32f_C3C1R(this->nppinputimage.data(), this->nppinputimage.pitch(), nppgreyfile.data(), nppgreyfile.pitch(),osizeROI);
+            nppiRGBToGray_32f_C3C1R(nppinputimage.data(),nppinputimage.pitch(), nppgreyfile.data(), nppgreyfile.pitch(),osizeROI);
+        }
+
+        void rgbtogray(npp::ImageNPP_16u_C3 &nppinputimage, npp::ImageNPP_16u_C1 &nppgreyfile){
+            NppStatus status;
+            NppiSize osizeROI={(int)nppinputimage.width(),(int)nppinputimage.height()};
+            status=nppiRGBToGray_16u_C3C1R(nppinputimage.data(), (int)nppinputimage.pitch(), nppgreyfile.data(),(int)nppgreyfile.pitch(),osizeROI);
+            std::cout<<"rgbtograystatus="<<status<<std::endl;
         }
 
         void addexposure(npp::ImageNPP_8u_C3 &nppinputfile,cv::Point_<int> offsetposition){
@@ -460,4 +502,37 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             
         }
 
+        void addexposure(npp::ImageNPP_16u_C3 &nppinputfile,cv::Point_<int> offsetposition){
+            if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
+                npp::ImageNPP_16u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+                this->exposuremap=tempexposuremap;
+            }
+            unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
+            unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
+            NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
+            nppiAddC_16u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,1);
+            
+        }
+
+        template<unsigned int N2>
+        void convert8utoother(npp::ImageNPP<Npp8u,N2> &addedimageinput,npp::ImageNPP<Npp32f,N2> &convertedimageinput){
+            NppiSize convertimageROI={(int)addedimageinput.width(),(int)addedimageinput.height()};
+            if(N2==1){
+                nppiConvert_8u32f_C1R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+            }
+            else if (N2==3){
+                nppiConvert_8u32f_C3R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+            }
+        }
+
+        template<unsigned int N2>
+        void convert8utoother(npp::ImageNPP<Npp8u,N2> &addedimageinput,npp::ImageNPP<Npp16u,N2> &convertedimageinput){
+            NppiSize convertimageROI={(int)addedimageinput.width(),(int)addedimageinput.height()};
+            if (N2==1){
+                nppiConvert_8u16u_C1R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+            }
+            else if(N2==3){
+                nppiConvert_8u16u_C3R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+            }
+        }
 };

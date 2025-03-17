@@ -1,0 +1,712 @@
+free=15532294144,total=15640231936
+directory has value testimage
+Outputname is testimageresult2.jpg
+2268,4032testimage/orion_10.jpg
+Maxidx8u status=0
+Maximum pixel: x=886,y=3142
+Am I here
+mirror status=0
+Convert8/32 status=0
+Am I here 4
+FINAL COUNTDOWN
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+am i here now
+free=15259664384,total=15640231936
+filename=testimage/orion_1.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2268,4032
+diff=-376,-225
+Am I now
+outboundupper x=2644,y=4257
+outboundlower x=376,y=225
+newsize=2644,4257
+newimage width=2644, height=4257
+offsetposition=0,0
+eresult=0
+newimage width=2644, height=4257
+offsetposition=0,0
+eresult=0
+newimage width=2644, height=4257
+offsetposition=0,0
+eresult=0
+newimage width=2644, height=4257
+offsetposition=0,0
+eresult=0
+newimage width=2644, height=4257
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2644,4257
+filename=testimage/orion_1.jpg
+filename=testimage/orion_10.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2644,4257
+diff=1,1
+Am I now
+outboundupper x=2267,y=4031
+outboundlower x=-1,y=-1
+newsize=2645,4258
+newimage width=2645, height=4258
+offsetposition=1,1
+eresult=0
+newimage width=2645, height=4258
+offsetposition=1,1
+eresult=0
+newimage width=2645, height=4258
+offsetposition=1,1
+eresult=0
+newimage width=2645, height=4258
+offsetposition=1,1
+eresult=0
+newimage width=2645, height=4258
+offsetposition=1,1
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2645,4258
+filename=testimage/orion_10.jpg
+filename=testimage/orion_11.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2645,4258
+diff=38,25
+Am I now
+outboundupper x=2230,y=4007
+outboundlower x=-38,y=-25
+newsize=2683,4283
+newimage width=2683, height=4283
+offsetposition=38,25
+eresult=0
+newimage width=2683, height=4283
+offsetposition=38,25
+eresult=0
+newimage width=2683, height=4283
+offsetposition=38,25
+eresult=0
+newimage width=2683, height=4283
+offsetposition=38,25
+eresult=0
+newimage width=2683, height=4283
+offsetposition=38,25
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2683,4283
+filename=testimage/orion_11.jpg
+filename=testimage/orion_12.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2683,4283
+diff=48,25
+Am I now
+outboundupper x=2220,y=4007
+outboundlower x=-48,y=-25
+newsize=2731,4308
+newimage width=2731, height=4308
+offsetposition=48,25
+eresult=0
+newimage width=2731, height=4308
+offsetposition=48,25
+eresult=0
+newimage width=2731, height=4308
+offsetposition=48,25
+eresult=0
+newimage width=2731, height=4308
+offsetposition=48,25
+eresult=0
+newimage width=2731, height=4308
+offsetposition=48,25
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2731,4308
+filename=testimage/orion_12.jpg
+filename=testimage/orion_13.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2731,4308
+diff=45,25
+Am I now
+outboundupper x=2223,y=4007
+outboundlower x=-45,y=-25
+newsize=2776,4333
+newimage width=2776, height=4333
+offsetposition=45,25
+eresult=0
+newimage width=2776, height=4333
+offsetposition=45,25
+eresult=0
+newimage width=2776, height=4333
+offsetposition=45,25
+eresult=0
+newimage width=2776, height=4333
+offsetposition=45,25
+eresult=0
+newimage width=2776, height=4333
+offsetposition=45,25
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2776,4333
+filename=testimage/orion_13.jpg
+filename=testimage/orion_14.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2776,4333
+diff=43,28
+Am I now
+outboundupper x=2225,y=4004
+outboundlower x=-43,y=-28
+newsize=2819,4361
+newimage width=2819, height=4361
+offsetposition=43,28
+eresult=0
+newimage width=2819, height=4361
+offsetposition=43,28
+eresult=0
+newimage width=2819, height=4361
+offsetposition=43,28
+eresult=0
+newimage width=2819, height=4361
+offsetposition=43,28
+eresult=0
+newimage width=2819, height=4361
+offsetposition=43,28
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2819,4361
+filename=testimage/orion_14.jpg
+filename=testimage/orion_15.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2819,4361
+diff=43,26
+Am I now
+outboundupper x=2225,y=4006
+outboundlower x=-43,y=-26
+newsize=2862,4387
+newimage width=2862, height=4387
+offsetposition=43,26
+eresult=0
+newimage width=2862, height=4387
+offsetposition=43,26
+eresult=0
+newimage width=2862, height=4387
+offsetposition=43,26
+eresult=0
+newimage width=2862, height=4387
+offsetposition=43,26
+eresult=0
+newimage width=2862, height=4387
+offsetposition=43,26
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2862,4387
+filename=testimage/orion_15.jpg
+filename=testimage/orion_16.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2862,4387
+diff=40,25
+Am I now
+outboundupper x=2228,y=4007
+outboundlower x=-40,y=-25
+newsize=2902,4412
+newimage width=2902, height=4412
+offsetposition=40,25
+eresult=0
+newimage width=2902, height=4412
+offsetposition=40,25
+eresult=0
+newimage width=2902, height=4412
+offsetposition=40,25
+eresult=0
+newimage width=2902, height=4412
+offsetposition=40,25
+eresult=0
+newimage width=2902, height=4412
+offsetposition=40,25
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2902,4412
+filename=testimage/orion_16.jpg
+filename=testimage/orion_17.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2902,4412
+diff=51,27
+Am I now
+outboundupper x=2217,y=4005
+outboundlower x=-51,y=-27
+newsize=2953,4439
+newimage width=2953, height=4439
+offsetposition=51,27
+eresult=0
+newimage width=2953, height=4439
+offsetposition=51,27
+eresult=0
+newimage width=2953, height=4439
+offsetposition=51,27
+eresult=0
+newimage width=2953, height=4439
+offsetposition=51,27
+eresult=0
+newimage width=2953, height=4439
+offsetposition=51,27
+eresult=0
+anothergo0
+test
+Last test bis
+test
+2953,4439
+filename=testimage/orion_17.jpg
+filename=testimage/orion_18.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=2953,4439
+diff=49,28
+Am I now
+outboundupper x=2219,y=4004
+outboundlower x=-49,y=-28
+newsize=3002,4467
+newimage width=3002, height=4467
+offsetposition=49,28
+eresult=0
+newimage width=3002, height=4467
+offsetposition=49,28
+eresult=0
+newimage width=3002, height=4467
+offsetposition=49,28
+eresult=0
+newimage width=3002, height=4467
+offsetposition=49,28
+eresult=0
+newimage width=3002, height=4467
+offsetposition=49,28
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3002,4467
+filename=testimage/orion_18.jpg
+filename=testimage/orion_19.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3002,4467
+diff=40,29
+Am I now
+outboundupper x=2228,y=4003
+outboundlower x=-40,y=-29
+newsize=3042,4496
+newimage width=3042, height=4496
+offsetposition=40,29
+eresult=0
+newimage width=3042, height=4496
+offsetposition=40,29
+eresult=0
+newimage width=3042, height=4496
+offsetposition=40,29
+eresult=0
+newimage width=3042, height=4496
+offsetposition=40,29
+eresult=0
+newimage width=3042, height=4496
+offsetposition=40,29
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3042,4496
+filename=testimage/orion_19.jpg
+filename=testimage/orion_2.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3042,4496
+diff=-731,-443
+Am I now
+outboundupper x=2999,y=4475
+outboundlower x=731,y=443
+newsize=3042,4496
+newimage width=3042, height=4496
+offsetposition=0,0
+eresult=0
+newimage width=3042, height=4496
+offsetposition=0,0
+eresult=0
+newimage width=3042, height=4496
+offsetposition=0,0
+eresult=0
+newimage width=3042, height=4496
+offsetposition=0,0
+eresult=0
+newimage width=3042, height=4496
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3042,4496
+filename=testimage/orion_2.jpg
+filename=testimage/orion_20.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3042,4496
+diff=59,31
+Am I now
+outboundupper x=2209,y=4001
+outboundlower x=-59,y=-31
+newsize=3101,4527
+newimage width=3101, height=4527
+offsetposition=59,31
+eresult=0
+newimage width=3101, height=4527
+offsetposition=59,31
+eresult=0
+newimage width=3101, height=4527
+offsetposition=59,31
+eresult=0
+newimage width=3101, height=4527
+offsetposition=59,31
+eresult=0
+newimage width=3101, height=4527
+offsetposition=59,31
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3101,4527
+filename=testimage/orion_20.jpg
+filename=testimage/orion_21.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3101,4527
+diff=43,33
+Am I now
+outboundupper x=2225,y=3999
+outboundlower x=-43,y=-33
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=43,33
+eresult=0
+newimage width=3144, height=4560
+offsetposition=43,33
+eresult=0
+newimage width=3144, height=4560
+offsetposition=43,33
+eresult=0
+newimage width=3144, height=4560
+offsetposition=43,33
+eresult=0
+newimage width=3144, height=4560
+offsetposition=43,33
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_21.jpg
+filename=testimage/orion_3.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3144,4560
+diff=-795,-485
+Am I now
+outboundupper x=3063,y=4517
+outboundlower x=795,y=485
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_3.jpg
+filename=testimage/orion_4.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3144,4560
+diff=-754,-460
+Am I now
+outboundupper x=3022,y=4492
+outboundlower x=754,y=460
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_4.jpg
+filename=testimage/orion_5.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3144,4560
+diff=-709,-433
+Am I now
+outboundupper x=2977,y=4465
+outboundlower x=709,y=433
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_5.jpg
+filename=testimage/orion_6.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3144,4560
+diff=-673,-406
+Am I now
+outboundupper x=2941,y=4438
+outboundlower x=673,y=406
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_6.jpg
+filename=testimage/orion_7.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3144,4560
+diff=-625,-378
+Am I now
+outboundupper x=2893,y=4410
+outboundlower x=625,y=378
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_7.jpg
+filename=testimage/orion_8.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3144,4560
+diff=-586,-356
+Am I now
+outboundupper x=2854,y=4388
+outboundlower x=586,y=356
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_8.jpg
+filename=testimage/orion_9.jpg
+convert s/f status=0
+iSum status=0
+cudaerr=0
+Filter status=0
+Maxidx8u status=0
+totalwidth=3144,4560
+diff=-544,-327
+Am I now
+outboundupper x=2812,y=4359
+outboundlower x=544,y=327
+newsize=3144,4560
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+newimage width=3144, height=4560
+offsetposition=0,0
+eresult=0
+anothergo0
+test
+Last test bis
+test
+3144,4560
+filename=testimage/orion_9.jpg
+maxpos=1878,3670
