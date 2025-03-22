@@ -219,10 +219,10 @@ class Nppop{
         NppStatus status;
         switch(N2){
             case 1: 
-                    nppiAdd_8u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    nppiAdd_8u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 0);
                     break;
             case 3:
-                    nppiAdd_8u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    nppiAdd_8u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 0);
                     break;    
         }        
 
@@ -234,10 +234,12 @@ class Nppop{
         NppStatus status;
         switch(N2){
             case 1: 
-                    nppiAdd_16u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    status=nppiAdd_16u_C1RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI,0);
+                    std::cout<<"nppiadd16uC1="<<status<<std::endl;
                     break;
             case 3:
-                    nppiAdd_16u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI, 1);
+                    status=nppiAdd_16u_C3RSfs(inputimage.data(offsetpositionx,offsetpositiony), inputimage.pitch(), extimage.data(), extimage.pitch(), tempimage.data(offsetpositionx,offsetpositiony), tempimage.pitch(), AddROI,0);
+                    std::cout<<"nppiadd16uC3="<<status<<std::endl;
                     break;    
         }
     }
@@ -262,10 +264,10 @@ class Nppop{
         NppiSize divROI={inputimage.width(),inputimage.height()};
         switch(N2){
             case 1:
-                nppiDiv_8u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                nppiDiv_8u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
                 break;
             case 3:
-                nppiDiv_8u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                nppiDiv_8u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
                 break;
         }
         
@@ -276,10 +278,10 @@ class Nppop{
         NppiSize divROI={inputimage.width(),inputimage.height()};
         switch(N2){
             case 1:
-                nppiDiv_16u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                nppiDiv_16u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
                 break;
             case 3:
-                nppiDiv_16u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,1);
+                nppiDiv_16u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
                 break;
         }
         
@@ -451,10 +453,12 @@ class astrojpg_rgb_ : public Nppop<D, 3>
         }
 
         void setinputNPP(npp::ImageNPP_8u_C3 &nppinputfile,npp::ImageNPP_16u_C3 &nppinputimage){
+            NppStatus status;
             npp::ImageNPP_16u_C3 nppconvertedfile(nppinputfile.width(),nppinputfile.height());
                 /*We need to convert from 8u to 32s*/
             NppiSize convertsizeROI={nppinputfile.width(),nppinputfile.height()};
-            nppiConvert_8u16u_C3R(nppinputfile.data(),(int) nppinputfile.pitch(), nppconvertedfile.data(),(int) nppconvertedfile.pitch(),convertsizeROI);
+            status=nppiConvert_8u16u_C3R(nppinputfile.data(),(int) nppinputfile.pitch(), nppconvertedfile.data(),(int) nppconvertedfile.pitch(),convertsizeROI);
+            std::cout<<"setinputNPP16u status="<<status<<std::endl;
             nppinputimage=nppconvertedfile;
         }
 
@@ -487,7 +491,7 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
             unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_8u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,1);
+            nppiAddC_8u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,0);
             
         }
         void addexposure(npp::ImageNPP_32f_C3 &nppinputfile,cv::Point_<int> offsetposition){
@@ -507,11 +511,16 @@ class astrojpg_rgb_ : public Nppop<D, 3>
                 npp::ImageNPP_16u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
                 this->exposuremap=tempexposuremap;
             }
+            NppStatus status;
             unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
             unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_16u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,1);
-            
+            status=nppiAddC_16u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,0);
+            std::cout<<"statusexposure16u="<<status<<std::endl;
+            if (status !=0){
+                std::cout<<"statusexposure16u="<<status<<std::endl;
+                exit(1);
+            }
         }
 
         template<unsigned int N2>
@@ -528,11 +537,18 @@ class astrojpg_rgb_ : public Nppop<D, 3>
         template<unsigned int N2>
         void convert8utoother(npp::ImageNPP<Npp8u,N2> &addedimageinput,npp::ImageNPP<Npp16u,N2> &convertedimageinput){
             NppiSize convertimageROI={(int)addedimageinput.width(),(int)addedimageinput.height()};
+            NppStatus status;
             if (N2==1){
-                nppiConvert_8u16u_C1R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+                status=nppiConvert_8u16u_C1R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+                std::cout<<"Convert8u16uC1="<<status<<std::endl;
             }
             else if(N2==3){
-                nppiConvert_8u16u_C3R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+                status=nppiConvert_8u16u_C3R(addedimageinput.data(), addedimageinput.pitch(), convertedimageinput.data(), convertedimageinput.pitch(), convertimageROI);
+                std::cout<<"Convert8u16uC3="<<status<<std::endl;
             }
+        }
+        template<unsigned int N2>
+        void convert8utoother(npp::ImageNPP<Npp8u,N2> &addedimageinput,npp::ImageNPP<Npp8u,N2> &convertedimageinput){
+            convertedimageinput=addedimageinput;
         }
 };

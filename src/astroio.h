@@ -113,8 +113,8 @@ inline void printastro(npp::ImageNPP<D,N> &image,cv::Point_<int> beginpos, cv::P
             for(i = beginpos.y; i<endpos.y  ;i++){
                 std::cout<<"i="<<i<<"[";
                 for(j = beginpos.x;j < endpos.x ;j++){
-                    uint16_t grey=outputimg.data[outputimg.cols * i + j ] ;
-                  if(grey>0)  std::cout<<grey<<",";
+                    uint16_t grey=(uint16_t)oHostdest.pixels(j,i)[0].x;
+                   if (grey>0) std::cout<<grey<<",";
                 }
                 std::cout<<"]"<<std::endl;
                 //std::cout<<i<<","<<j<<std::endl;
@@ -126,9 +126,9 @@ inline void printastro(npp::ImageNPP<D,N> &image,cv::Point_<int> beginpos, cv::P
 
             for(i= beginpos.y; i<endpos.y  ;i++){
                 for(j = beginpos.x;j < endpos.x ;j+=3){
-                    uint16_t b = outputimg.data[outputimg.cols * i + j ] ;
-                    uint16_t g = outputimg.data[outputimg.cols * i + j + 1];
-                    uint16_t r = outputimg.data[outputimg.cols * i + j + 2];
+                    uint16_t b = oHostdest.pixels(j,i)[0].x;
+                    uint16_t g = oHostdest.pixels(j,i)[1].x;
+                    uint16_t r = oHostdest.pixels(j,i)[2].x;
                     std::cout<<"r="<<r<<",g="<<g<<",b="<<b<<std::endl;
                 }
             std::cout<<i<<","<<j<<std::endl;
