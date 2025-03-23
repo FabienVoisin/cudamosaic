@@ -20,7 +20,7 @@ class Nppop{
     npp::ImageNPP_32s_C1 maskimage;
     npp::ImageNPP<Npp8u,1> signalimage;
     npp::ImageNPP<Npp8u,1> correlationimage;
-    npp::ImageNPP<D,1> exposuremap;
+    npp::ImageNPP<D,3> exposuremap;
 
     Nppop():maskimage(1,1),signalimage(1,1),correlationimage(1,1),exposuremap(1,1),maxpixelposition(-1,-1),maxcorrposition(-1,-1){}
     
@@ -245,11 +245,14 @@ class Nppop{
     }
 
     template <unsigned int N2>
-    void nppidivide(npp::ImageNPP<Npp32f,N2> &inputimage, npp::ImageNPP<Npp32f,1> &exposuremap,npp::ImageNPP<Npp32f,N2> &outputimage){
+    void nppidivide(npp::ImageNPP<Npp32f,N2> &inputimage, npp::ImageNPP<Npp32f,3> &exposuremap,npp::ImageNPP<Npp32f,N2> &outputimage){
         NppiSize divROI={inputimage.width(),inputimage.height()};
+        npp::ImageNPP_32f_C1 singleexposuremap(exposuremap.width(),exposuremap.height());
+        NppStatus status;
         switch(N2){
             case 1:
-                nppiDiv_32f_C1R(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI);
+                nppiCopy_32f_C3C1R(exposuremap.data(),(int) exposuremap.pitch(), singleexposuremap.data(),(int)singleexposuremap.pitch() , divROI);
+                nppiDiv_32f_C1R(singleexposuremap.data(),(int)singleexposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI);
                 break;
             case 3:
                 std::cout<<"testnormalisation"<<std::endl;
@@ -260,11 +263,13 @@ class Nppop{
     }
 
     template <unsigned int N2>
-    void nppidivide(npp::ImageNPP<Npp8u,N2> &inputimage, npp::ImageNPP<Npp8u,1> &exposuremap,npp::ImageNPP<Npp8u,N2> &outputimage){
+    void nppidivide(npp::ImageNPP<Npp8u,N2> &inputimage, npp::ImageNPP<Npp8u,3> &exposuremap,npp::ImageNPP<Npp8u,N2> &outputimage){
         NppiSize divROI={inputimage.width(),inputimage.height()};
+        npp::ImageNPP_8u_C1 singleexposuremap(exposuremap.width(),exposuremap.height());
         switch(N2){
             case 1:
-                nppiDiv_8u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
+                nppiCopy_8u_C3C1R(exposuremap.data(),(int) exposuremap.pitch(), singleexposuremap.data(),(int)singleexposuremap.pitch() , divROI);
+                nppiDiv_8u_C1RSfs(singleexposuremap.data(),singleexposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
                 break;
             case 3:
                 nppiDiv_8u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
@@ -274,11 +279,14 @@ class Nppop{
     }
 
     template <unsigned int N2>
-    void nppidivide(npp::ImageNPP<Npp16u,N2> &inputimage, npp::ImageNPP<Npp16u,1> &exposuremap,npp::ImageNPP<Npp16u,N2> &outputimage){
+    void nppidivide(npp::ImageNPP<Npp16u,N2> &inputimage, npp::ImageNPP<Npp16u,3> &exposuremap,npp::ImageNPP<Npp16u,N2> &outputimage){
         NppiSize divROI={inputimage.width(),inputimage.height()};
+        npp::ImageNPP_16u_C1 singleexposuremap(exposuremap.width(),exposuremap.height());
+        
         switch(N2){
             case 1:
-                nppiDiv_16u_C1RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
+                nppiCopy_16u_C3C1R(exposuremap.data(),(int) exposuremap.pitch(), singleexposuremap.data(),(int)singleexposuremap.pitch() , divROI);
+                nppiDiv_16u_C1RSfs(singleexposuremap.data(),singleexposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
                 break;
             case 3:
                 nppiDiv_16u_C3RSfs(exposuremap.data(), exposuremap.pitch(), inputimage.data(), inputimage.pitch(), outputimage.data(), outputimage.pitch(), divROI,0);
@@ -381,7 +389,7 @@ class astrojpg_rgb_ : public Nppop<D, 3>
             if (this->maskimage.width()*this->maskimage.height()!=1) Nppop<D,3>::template resizeimage<Npp32s,1>(this->maskimage,newimagewidth,newimageheight,imageposition);
             if (this->signalimage.width()*this->signalimage.height()!=1) Nppop<D,3>::template resizeimage<Npp8u,1>(this->signalimage,newimagewidth,newimageheight,imageposition);
             if (this->correlationimage.width()*this->correlationimage.height()!=1) Nppop<D,3>::template resizeimage<Npp8u,1>(this->correlationimage,newimagewidth,newimageheight,imageposition);
-            if (this->exposuremap.width()*this->exposuremap.height()!=1) Nppop<D,3>::template resizeimage<D,1>(this->exposuremap,newimagewidth,newimageheight,imageposition);
+            if (this->exposuremap.width()*this->exposuremap.height()!=1) Nppop<D,3>::template resizeimage<D,3>(this->exposuremap,newimagewidth,newimageheight,imageposition);
             if(this->maxpixelposition.x>-1 && this->maxpixelposition.y>-1) Nppop<D,3>::shiftposition(this->maxpixelposition,imageposition);
             if(this->maxcorrposition.x>-1 && this->maxcorrposition.y>-1)  Nppop<D,3>::shiftposition(this->maxcorrposition,imageposition);
  
@@ -485,42 +493,42 @@ class astrojpg_rgb_ : public Nppop<D, 3>
 
         void addexposure(npp::ImageNPP_8u_C3 &nppinputfile,cv::Point_<int> offsetposition){
             if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
-                npp::ImageNPP_8u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+                npp::ImageNPP_8u_C3 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
                 this->exposuremap=tempexposuremap;
             }
             unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
             unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_8u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,0);
+            const Npp8u ones[3]={1,1,1};
+            nppiAddC_8u_C3IRSfs(ones,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,0);
             
         }
         void addexposure(npp::ImageNPP_32f_C3 &nppinputfile,cv::Point_<int> offsetposition){
             if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
-                npp::ImageNPP_32f_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+                npp::ImageNPP_32f_C3 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
                 this->exposuremap=tempexposuremap;
             }
             unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
             unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            nppiAddC_32f_C1IR(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI);
+            const Npp32f ones[3]={1,1,1};
+            nppiAddC_32f_C3IR(ones,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI);
             
         }
 
         void addexposure(npp::ImageNPP_16u_C3 &nppinputfile,cv::Point_<int> offsetposition){
             if (this->exposuremap.width()==1 && this->exposuremap.height()==1){
-                npp::ImageNPP_16u_C1 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
+                npp::ImageNPP_16u_C3 tempexposuremap((int)nppinputfile.width(),(int)nppinputfile.height());
                 this->exposuremap=tempexposuremap;
             }
             NppStatus status;
             unsigned int offsetpositionx=(offsetposition.x<0)*std::abs(offsetposition.x)+(offsetposition.x>=0)*0;
             unsigned int offsetpositiony=(offsetposition.y<0)*std::abs(offsetposition.y)+(offsetposition.y>=0)*0;
             NppiSize osizeROI={(int)nppinputfile.width(),(int)nppinputfile.height()};
-            status=nppiAddC_16u_C1IRSfs(1,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,0);
+            const Npp16u ones[3]={1,1,1};
+            status=nppiAddC_16u_C3IRSfs(ones,this->exposuremap.data(offsetpositionx,offsetpositiony), (int)this->exposuremap.pitch(),osizeROI,0);
             std::cout<<"statusexposure16u="<<status<<std::endl;
-            if (status !=0){
-                std::cout<<"statusexposure16u="<<status<<std::endl;
-                exit(1);
-            }
+            
         }
 
         template<unsigned int N2>
