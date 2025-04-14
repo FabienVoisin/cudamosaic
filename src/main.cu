@@ -16,7 +16,7 @@ void listfiles(std::string directorypath,std::vector<std::string> &list_of_files
     }
 }
 
-int main(int argc, char ** argv){
+int main(int argc, char **argv){
     cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, 0);
     cudaMemPool_t memPool;
@@ -38,6 +38,7 @@ int main(int argc, char ** argv){
     std::cout<<files[1]<<std::endl;
     //for (auto filename: files) std::cout<<filename<<std::endl;
     image1.getgreyimage(); //get the grey image 
+    //printastro<Npp8u,3>(image1.nppinputimage,{1,1},{image1.nppinputimage.width()-1,image1.nppinputimage.height()-1});
     Npp8u* maxbuffer;
     Npp8u* sumbuffer;
     size_t  maxbufferhostsize;
@@ -75,10 +76,15 @@ int main(int argc, char ** argv){
     int differencex,differencey;
     
     astrojpg_rgb_<Npp32f> imagetotal(files[1]);
+     std::cout<<files[1]<<std::endl;
     imagetotal.getgreyimage();
+    //printastro<Npp16u,1>(imagetotal.exposuremap,{1,1},{imagetotal.nppgreyimage.width()-1,imagetotal.nppgreyimage.height()-1});
     imagetotal.getsignalimage(imagetotal.nppgreyimage,threshold);
     imagetotal.Correlationimage(image1.maskimage,sumbuffer);
     imagetotal.getmaxpixel(imagetotal.correlationimage,imagetotal.maxcorrposition,maxbuffer);
+    //printastro<Npp32f,3>(imagetotal.nppinputimage,{1,1},{imagetotal.nppgreyimage.width()-1,imagetotal.nppgreyimage.height()-1});
+    saveastro<Npp8u,1>(imagetotal.signalimage,"singleimage.png");
+    std::cout<<"imagetotalcorrpos="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
     cudaDeviceSynchronize();
     std::cout<<"am i here now"<<std::endl;
     cudaMemGetInfo(&free,&total);
@@ -106,19 +112,30 @@ int main(int argc, char ** argv){
         std::cout<<"diff="<<differencex<<","<<differencey<<std::endl;
         std::cout<<"Am I now"<<std::endl;
         imagetotal.stackimage(iterimage);
+        //printastro<Npp16u,1>(imagetotal.exposuremap,{imagetotal.maxcorrposition.x-20,imagetotal.maxcorrposition.y-20},{imagetotal.maxcorrposition.x+20,imagetotal.maxcorrposition.y+20});
         std::cout<<imagetotal.nppinputimage.width()<<","<<imagetotal.nppinputimage.height()<<std::endl;
         cudaDeviceSynchronize();
         //std::string iterstack="finalresult_"+std::to_string(i)+".jpg";
         //saveastro<Npp32f,3>(imagetotal.nppinputimage,iterstack);
         //std::string iterexp="finalexp_"+std::to_string(i)+".jpg";
         //saveastro<Npp32f,1>(imagetotal.exposuremap,iterexp);
+        std::cout<<"filename="<<file<<std::endl;
+        //printastro<Npp32s,1>(imagetotal.nppgreyimage,{1,1},{imagetotal.nppgreyimage.width()-1,imagetotal.nppgreyimage.height()-1});
         i++;
     }
     
     //std::cout<<"diff="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
     //cv::Point_<int> offsetposition={differencex,differencey};
     //imagetotal.stackimage(image3,offsetposition);
-    saveastro<Npp32f,3>(imagetotal.nppinputimage,outputfilename);
-    saveastro<Npp32f,1>(imagetotal.exposuremap,"finalresultexp.jpg");
+    imagetotal.normaliseimage<Npp32f,3>(imagetotal.nppinputimage);
+    imagetotal.normaliseimage<Npp32f,1>(imagetotal.nppgreyimage);
+    //cv::Point_<int> finalmax;
+    //imagetotal.getmaxpixel(imagetotal.nppgreyimage,finalmax,maxbuffer);
+    std::cout<<"maxpos="<<imagetotal.maxcorrposition.x<<","<<imagetotal.maxcorrposition.y<<std::endl;
+    //printastro<Npp32f,3>(imagetotal.nppinputimage,{imagetotal.maxcorrposition.x-50,imagetotal.maxcorrposition.y-50},{imagetotal.maxcorrposition.x+50,imagetotal.maxcorrposition.y+50});
+    printastro<Npp32f,1>(imagetotal.nppgreyimage,{1,1},{imagetotal.nppgreyimage.width()-1,imagetotal.nppgreyimage.height()-1});
+  
+    saveastro<Npp32f,3>(imagetotal.nppinputimage,outputfilename);    
+    saveastro<Npp32f,3>(imagetotal.exposuremap,"finalresultexp.jpg");
     return 0;
 }
