@@ -16,14 +16,14 @@ int squaresize;
 const Npp8u threshold=40;
 
 void setupmaxbuffer(astrojpg_rgb_<Npp8u> &image1){
-    size_t  maxbufferhostsize;
+    int  maxbufferhostsize;
     NppiSize osizeROI={(int)image1.nppgreyimage.width(),(int)image1.nppgreyimage.height()};
     nppiMaxIndxGetBufferHostSize_8u_C1R(osizeROI, &maxbufferhostsize);
     cudaMalloc((void**)&maxbuffer,maxbufferhostsize);
 }
 
 void setupsumbuffer(int squaresize){
-    size_t  sumbufferhostsize;
+    int  sumbufferhostsize;
     NppiSize osumROI={squaresize,squaresize};
     nppiSumGetBufferHostSize_32f_C1R(osumROI, &sumbufferhostsize);
     cudaMalloc((void**)&sumbuffer,sumbufferhostsize);
@@ -49,11 +49,8 @@ void mosaicimages(std::vector<std::string> &files, astrojpg_rgb_<Npp32f> &imaget
     imagetotal.getmaxpixel(imagetotal.correlationimage,imagetotal.maxcorrposition,maxbuffer);
 
     for (std::string file : files ){
-        std::cout<<"filename="<<file<<std::endl;
         astrojpg_rgb_<Npp8u> iterimage(file);
-        
         iterimage.getgreyimage();
-        
         iterimage.getsignalimage(iterimage.nppgreyimage,threshold);
         iterimage.Correlationimage(image1.maskimage,sumbuffer);
         iterimage.getmaxpixel(iterimage.correlationimage,iterimage.maxcorrposition,maxbuffer);
@@ -62,9 +59,8 @@ void mosaicimages(std::vector<std::string> &files, astrojpg_rgb_<Npp32f> &imaget
         differencey=iterimage.maxcorrposition.y-imagetotal.maxcorrposition.y;
         cv::Point_<int> offsetposition={differencex,differencey};
         imagetotal.stackimage(iterimage);
-        std::cout<<imagetotal.nppinputimage.width()<<","<<imagetotal.nppinputimage.height()<<std::endl;
+        //std::cout<<imagetotal.nppinputimage.width()<<","<<imagetotal.nppinputimage.height()<<std::endl;
         cudaDeviceSynchronize();
-        std::cout<<"filename="<<file<<std::endl;
     }
 }
 
