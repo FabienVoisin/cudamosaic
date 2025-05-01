@@ -15,7 +15,49 @@ Let's consider an image as a matrix of binary values. We will perform a regressi
 
 # installation of cudamosaic and prerequisite
 ## Pre-requisites
+### CUDA
 cudamosaic has been tested with Ubuntu 22.04 and cuda 11 and above. We first suggest you install the cuda packages.
 Please see https://developer.nvidia.com/cuda-downloads for latest cuda installation.
 
-We also need access to opencv4 
+Make sure that nvcc is also in the PATH directory
+```bash
+ubuntu@ip-10-255-9-77:~/cudamosaic$ which nvcc
+/usr/local/cuda-12.8/bin//nvcc
+```
+If not please add the cuda folder in your PATH environment variable.
+```bash
+export PATH=/usr/local/cuda-<version>/bin:${PATH}
+```
+where `version` is in our case 12.8.
+
+### OpenCV
+We also need access to `opencv`
+```
+sudo apt-get install libopencv-dev
+```
+Once this is done, we are ready to install `cudamosaic` 
+
+## Clone and install cudamosaic
+
+```
+git clone https://github.com/FabienVoisin/cudamosaic.git
+```
+Then one needs to clone the NPP utils repo 
+```
+cd cudamosaic
+git submodule init
+git submodule update
+```
+Then type 
+```
+make
+```
+to compile the code
+
+In order to test the code, one can use the Orion folder or testimage folders via the following command
+```
+./mosaic -d testimage -o testimagemosaic.png
+```
+The output image should in this case be  `testimagemosaic.png`. The image `finalresultexp.jpg` also provides the final exposure map from aggregating all the input images. 
+
+
