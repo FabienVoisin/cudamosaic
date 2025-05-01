@@ -1,17 +1,5 @@
 # cudamosaic
 This project aims to stack a few astronomical images together and come up with a Mosaic image.
-# vision
-The code will first look at specific pixels of the image above a specific threshold. We will call these pixels "signals" 
-As a first step, the code will create a copy of this image with a binary value (0 for background, 1 for signal). 
-It will then iterate through the next couple of images and proceed to the same step.
-The algorithm will then compare the image and come up with a "difference" value. In short term, it will perform a substraction of all the binary values between the two images. The higher the value, the more difference there will be between the two images.
-The goal is then to perform a translation (and eventually rotation) of the image to minimize this difference. Once we have found out the local minimum, we will create a combined "averaged" image where the second image is offset by that optimized value. 
-We finally repeat the same step.
-# translation algorithm and challenges
-One of the difficult challenge to consider is that moving the second image by a pixel may not have any effect. 
-A parallel search for that difference across the various tranlations.
-One brainstorm idea would be to sum the value across the image to give us an idea of how much signal there is. We can potentially look for the difference between the two image "pixel by pixel" and pick the one whose final value is below 5% of the total signal found (we still need some head room as we can easily imagine there will be some artefacts.)
-Let's consider an image as a matrix of binary values. We will perform a regression by rows and columns.
 
 # installation of cudamosaic and prerequisite
 ## Pre-requisites
@@ -60,4 +48,14 @@ In order to test the code, one can use the Orion folder or testimage folders via
 ```
 The output image should in this case be  `testimagemosaic.png`. The image `finalresultexp.jpg` also provides the final exposure map from aggregating all the input images. 
 
+## Command line parameters
+There are currently two command line parameters:
 
+`-d` (required): path of folders which has the input images
+
+`-o` (optional): filename of the output mosaic image. In the case, this is not explicitely parsed, then `defaultfilename.jpg` would be used.
+
+# How it works
+The code makes use of the NPP utils library to perform analysis and calculation on input images.
+The code first creates a greyscale image of the first image. Based on a specific threshold, the code then highlight pixels above certain values. It will then select a box of the signals around the pixel with the highest intensity.
+The code will use this box to perform correlation maps with other images. We expect the maximum value of the correlation maps will determine the offset position between the new input images and the mosaic images. Once that offset position is calculated, the code add the values of the new input images onto the mosaic output image. The final output image is then normalised by dividing the output image by the exposure map.
