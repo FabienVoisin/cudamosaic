@@ -12,3 +12,10 @@ One of the difficult challenge to consider is that moving the second image by a 
 A parallel search for that difference across the various tranlations.
 One brainstorm idea would be to sum the value across the image to give us an idea of how much signal there is. We can potentially look for the difference between the two image "pixel by pixel" and pick the one whose final value is below 5% of the total signal found (we still need some head room as we can easily imagine there will be some artefacts.)
 Let's consider an image as a matrix of binary values. We will perform a regression by rows and columns.
+
+# installation of cudamosaic and prerequisite
+## Pre-requisites
+cudamosaic has been tested with Ubuntu 22.04 and cuda 11 and above. We first suggest you install the cuda packages.
+Please see https://developer.nvidia.com/cuda-downloads for latest cuda installation.
+
+We also need access to opencv4 
