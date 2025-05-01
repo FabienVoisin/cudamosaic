@@ -16,14 +16,14 @@ int squaresize;
 const Npp8u threshold=40;
 
 void setupmaxbuffer(astrojpg_rgb_<Npp8u> &image1){
-    int  maxbufferhostsize;
+    size_t  maxbufferhostsize;
     NppiSize osizeROI={(int)image1.nppgreyimage.width(),(int)image1.nppgreyimage.height()};
     nppiMaxIndxGetBufferHostSize_8u_C1R(osizeROI, &maxbufferhostsize);
     cudaMalloc((void**)&maxbuffer,maxbufferhostsize);
 }
 
 void setupsumbuffer(int squaresize){
-    int  sumbufferhostsize;
+    size_t sumbufferhostsize;
     NppiSize osumROI={squaresize,squaresize};
     nppiSumGetBufferHostSize_32f_C1R(osumROI, &sumbufferhostsize);
     cudaMalloc((void**)&sumbuffer,sumbufferhostsize);
