@@ -1,7 +1,14 @@
 # cudamosaic
 The code makes use of the NPP utils library to combine an list of images in a folder (see below) 
-![Image](https://github.com/user-attachments/assets/15db7399-e3d6-43fa-88aa-f852af84f5c0)
+
+<img src="https://github.com/user-attachments/assets/15db7399-e3d6-43fa-88aa-f852af84f5c0" width="1000">
+</img>
+
+
 onto a a single output image. By doing so, one can aim to increase exposure, signal to noise ratio, or simply mosaic astronomical images into a single image.
+
+<img src="https://github.com/user-attachments/assets/6dc868b0-9c8c-4019-bd6e-9cdd2795232b" width="200">
+
 
 # installation of cudamosaic and prerequisite
 ## Pre-requisites
