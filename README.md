@@ -1,5 +1,7 @@
 # cudamosaic
-This project aims to stack a few astronomical images together and come up with a Mosaic image.
+The code makes use of the NPP utils library to combine an list of images in a folder (see below) 
+![Image](https://github.com/user-attachments/assets/15db7399-e3d6-43fa-88aa-f852af84f5c0)
+onto a a single output image. By doing so, one can aim to increase exposure, signal to noise ratio, or simply mosaic astronomical images into a single image.
 
 # installation of cudamosaic and prerequisite
 ## Pre-requisites
@@ -57,8 +59,6 @@ There are currently two command line parameters:
 
 
 # How it works
-The code makes use of the NPP utils library to combine an list of images in a folder (see below) 
-![Image](https://github.com/user-attachments/assets/15db7399-e3d6-43fa-88aa-f852af84f5c0)
-to a a single image.
+
 The code first creates a greyscale image of the first image. Based on a specific threshold, the code then highlight pixels above certain values. It will then select a box of the signals around the pixel with the highest intensity.
 The code will use this box to perform correlation maps with other images. We expect the maximum value of the correlation maps will determine the offset position between the new input images and the mosaic images. Once that offset position is calculated, the code add the values of the new input images onto the mosaic output image. The final output image is then normalised by dividing the output image by the exposure map.
