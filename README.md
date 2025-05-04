@@ -55,7 +55,7 @@ There are currently two command line parameters:
 
 `-o` (optional): filename of the output mosaic image. In the case, this is not explicitely parsed, then `defaultfilename.jpg` would be used.
 
-![](doc\inputimages.png)
+![](cudamosaic/doc/inputimages.png)
 # How it works
 The code makes use of the NPP utils library to perform analysis and calculation on input images.
 The code first creates a greyscale image of the first image. Based on a specific threshold, the code then highlight pixels above certain values. It will then select a box of the signals around the pixel with the highest intensity.
