@@ -13,7 +13,7 @@ onto a a single output image. By doing so, one can aim to increase exposure, sig
 # installation of cudamosaic and prerequisite
 ## Pre-requisites
 ### CUDA
-cudamosaic has been tested with Ubuntu 22.04 and cuda 11 and above. We first suggest you install the cuda packages.
+cudamosaic has been tested with Ubuntu 22.04 and cuda 12.6 and above. We first suggest you install the cuda packages.
 Please see https://developer.nvidia.com/cuda-downloads for latest cuda installation.
 
 Make sure that nvcc is also in the PATH directory
@@ -69,3 +69,17 @@ There are currently two command line parameters:
 
 The code first creates a greyscale image of the first image. Based on a specific threshold, the code then highlight pixels above certain values. It will then select a box of the signals around the pixel with the highest intensity.
 The code will use this box to perform correlation maps with other images. We expect the maximum value of the correlation maps will determine the offset position between the new input images and the mosaic images. Once that offset position is calculated, the code add the values of the new input images onto the mosaic output image. The final output image is then normalised by dividing the output image by the exposure map.
+
+# Future works
+
+## Use CUDA streams for optimized job performances
+In the future, all input images should be processed independently in streams.
+
+## Provide signal correlation score
+The code currently does not provide any method to measure how well the correlation signal box managed to match with the input images. A threshold score would reject input images with potentially incorrect position.
+
+## Enable rotation of input images.
+In some case, the image may need rotation as well as translation to perfectly match with the reference image.
+
+## Better methods to choose box of signals
+The algorithm currently picks the pixel with the highest grey-scale intensity value to create a box of signals. However, this would work best to choose a box with the least amount of degeneracies (e.g permutations in signals within the box that will lead to the same result) to avoid incorrect offset position. 
