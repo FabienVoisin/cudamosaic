@@ -1,14 +1,85 @@
 # cudamosaic
-This project aims to stack a few astronomical images together and come up with a Mosaic image.
-# vision
-The code will first look at specific pixels of the image above a specific threshold. We will call these pixels "signals" 
-As a first step, the code will create a copy of this image with a binary value (0 for background, 1 for signal). 
-It will then iterate through the next couple of images and proceed to the same step.
-The algorithm will then compare the image and come up with a "difference" value. In short term, it will perform a substraction of all the binary values between the two images. The higher the value, the more difference there will be between the two images.
-The goal is then to perform a translation (and eventually rotation) of the image to minimize this difference. Once we have found out the local minimum, we will create a combined "averaged" image where the second image is offset by that optimized value. 
-We finally repeat the same step.
-# translation algorithm and challenges
-One of the difficult challenge to consider is that moving the second image by a pixel may not have any effect. 
-A parallel search for that difference across the various tranlations.
-One brainstorm idea would be to sum the value across the image to give us an idea of how much signal there is. We can potentially look for the difference between the two image "pixel by pixel" and pick the one whose final value is below 5% of the total signal found (we still need some head room as we can easily imagine there will be some artefacts.)
-Let's consider an image as a matrix of binary values. We will perform a regression by rows and columns.
+The code makes use of the NPP utils library to combine an list of images in a folder (see below) 
+
+<img src="https://github.com/user-attachments/assets/15db7399-e3d6-43fa-88aa-f852af84f5c0" width="1000">
+</img>
+
+
+onto a a single output image. By doing so, one can aim to increase exposure, signal to noise ratio, or simply mosaic astronomical images into a single image.
+
+<img src="https://github.com/user-attachments/assets/6dc868b0-9c8c-4019-bd6e-9cdd2795232b" width="200">
+
+
+# installation of cudamosaic and prerequisite
+## Pre-requisites
+### CUDA
+cudamosaic has been tested with Ubuntu 22.04 and cuda 12.6 and above. We first suggest you install the cuda packages.
+Please see https://developer.nvidia.com/cuda-downloads for latest cuda installation.
+
+Make sure that nvcc is also in the PATH directory
+```bash
+ubuntu@ip-10-255-9-77:~/cudamosaic$ which nvcc
+/usr/local/cuda-12.8/bin//nvcc
+```
+If not please add the cuda folder in your PATH environment variable.
+```bash
+export PATH=/usr/local/cuda-<version>/bin:${PATH}
+```
+where `version` is in our case 12.8.
+
+### OpenCV
+We also need access to `opencv`
+```
+sudo apt-get install libopencv-dev
+```
+Once this is done, we are ready to install `cudamosaic` 
+
+## Clone and install cudamosaic
+
+```
+git clone https://github.com/FabienVoisin/cudamosaic.git
+```
+Then one needs to clone the NPP utils repo 
+```
+cd cudamosaic
+git submodule init
+git submodule update
+```
+Then type 
+```
+make
+```
+to compile the code
+
+In order to test the code, one can use the Orion folder or testimage folders via the following command
+```
+./mosaic -d testimage -o testimagemosaic.png
+```
+The output image should in this case be  `testimagemosaic.png`. The image `finalresultexp.jpg` also provides the final exposure map from aggregating all the input images. 
+
+## Command line parameters
+There are currently two command line parameters:
+
+`-d` (required): path of folders which has the input images
+
+`-o` (optional): filename of the output mosaic image. In the case, this is not explicitely parsed, then `defaultfilename.jpg` would be used.
+
+
+# How it works
+
+The code first creates a greyscale image of the first image. Based on a specific threshold, the code then highlight pixels above certain values. It will then select a box of the signals around the pixel with the highest intensity.
+The code will use this box to perform correlation maps with other images. We expect the maximum value of the correlation maps will determine the offset position between the new input images and the mosaic images. Once that offset position is calculated, the code add the values of the new input images onto the mosaic output image. The final output image is then normalised by dividing the output image by the exposure map.
+
+# Future works
+
+## Use CUDA streams for optimized job performances
+In the future, all input images should be processed independently in streams.
+
+## Provide signal correlation score
+The code currently does not provide any method to measure how well the correlation signal box managed to match with the input images. A threshold score would reject input images with potentially incorrect position.
+
+## Enable rotation of input images.
+In some case, the image may need rotation as well as translation to perfectly match with the reference image.
+
+## Better methods to choose box of signals
+The algorithm currently picks the pixel with the highest grey-scale intensity value to create a box of signals. However, this would work best to choose a box with the least amount of degeneracies (e.g permutations in signals within the box that will lead to the same result) to avoid incorrect offset position. 
