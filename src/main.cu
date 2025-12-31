@@ -8,12 +8,13 @@
 /*Extern variables */
 extern std::string directorypath;
 extern std::string outputfilename;
-
+extern int positionx;
+extern int positiony;
 /*global variable : NPP buffers */
 Npp8u *maxbuffer;
 Npp8u *sumbuffer;
 int squaresize;
-const Npp8u threshold=40;
+const Npp8u threshold=10;
 
 void setupmaxbuffer(astrojpg_rgb_<Npp8u> &image1){
     size_t  maxbufferhostsize;
@@ -34,7 +35,13 @@ void initfirstimage(astrojpg_rgb_<Npp8u> &image1){
     setupsumbuffer(squaresize);
     image1.getgreyimage(); 
     image1.getsignalimage(image1.nppgreyimage,threshold);
-    image1.getmaxpixel(image1.nppgreyimage,image1.maxpixelposition,maxbuffer);
+    if(positionx<0 && positiony<0){
+        image1.getmaxpixel(image1.nppgreyimage,image1.maxpixelposition,maxbuffer);
+    }
+    else{
+        image1.setmaxpixel(image1.maxpixelposition,positionx,positiony);
+    }
+
     cudaDeviceSynchronize();
     image1.createROIdata(squaresize);
 
@@ -96,7 +103,7 @@ int main(int argc, char **argv){
 
     astrojpg_rgb_<Npp32f> imagetotal(files[1]);
     mosaicimages(files,imagetotal,image1);
-    normaliseimage(imagetotal);
+    //normaliseimage(imagetotal);
     outputmosaic(imagetotal);
 
     

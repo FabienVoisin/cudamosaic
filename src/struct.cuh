@@ -54,6 +54,10 @@ class Nppop{
         cudaFree(positiony);
     }
 
+    void setmaxpixel(cv::Point_<int> &maxpixelposition,int positionx, int positiony){
+        maxpixelposition.x=positionx;
+        maxpixelposition.y=positiony;
+    }
 
     void createROIdata(int squaresize){
         NppiSize osizeROI={squaresize,squaresize}; //Setup the osizeROI
