@@ -14,7 +14,7 @@ extern int positiony;
 Npp8u *maxbuffer;
 Npp8u *sumbuffer;
 int squaresize;
-const Npp8u threshold=10;
+const Npp8u threshold=140;
 
 void setupmaxbuffer(astrojpg_rgb_<Npp8u> &image1){
     size_t  maxbufferhostsize;
@@ -44,6 +44,7 @@ void initfirstimage(astrojpg_rgb_<Npp8u> &image1){
 
     cudaDeviceSynchronize();
     image1.createROIdata(squaresize);
+    saveastro<Npp8u,1>(image1.signalimage,"templatesignalimage.jpg");
 
 }
 
@@ -53,6 +54,7 @@ void mosaicimages(std::vector<std::string> &files, astrojpg_rgb_<Npp32f> &imaget
     imagetotal.getgreyimage();
     imagetotal.getsignalimage(imagetotal.nppgreyimage,threshold);
     imagetotal.Correlationimage(image1.maskimage,sumbuffer);
+    saveastro<Npp32s,1>(image1.maskimage,"correlationmap.jpg");
     imagetotal.getmaxpixel(imagetotal.correlationimage,imagetotal.maxcorrposition,maxbuffer);
 
     for (std::string file : files ){
@@ -61,10 +63,11 @@ void mosaicimages(std::vector<std::string> &files, astrojpg_rgb_<Npp32f> &imaget
         iterimage.getsignalimage(iterimage.nppgreyimage,threshold);
         iterimage.Correlationimage(image1.maskimage,sumbuffer);
         iterimage.getmaxpixel(iterimage.correlationimage,iterimage.maxcorrposition,maxbuffer);
-        
+        saveastro<Npp8u,1>(iterimage.correlationimage,"correlationmap1.jpg");
         differencex=iterimage.maxcorrposition.x-imagetotal.maxcorrposition.x;
         differencey=iterimage.maxcorrposition.y-imagetotal.maxcorrposition.y;
         cv::Point_<int> offsetposition={differencex,differencey};
+        std::cout<<"offset x="<<differencex<<" offset y="<<differencey<<std::endl;
         imagetotal.stackimage(iterimage);
         //std::cout<<imagetotal.nppinputimage.width()<<","<<imagetotal.nppinputimage.height()<<std::endl;
         cudaDeviceSynchronize();
@@ -97,7 +100,7 @@ int main(int argc, char **argv){
     }
     listfiles(directorypath,files);
     std::stable_sort(files.begin(), files.end());
-    squaresize=111;
+    squaresize=711;
     astrojpg_rgb_<Npp8u> image1(files[0]);
     initfirstimage(image1);
 
