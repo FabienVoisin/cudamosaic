@@ -2,8 +2,8 @@ NVCC=$(shell which nvcc)
 CUDAVERSION=$(shell $(NVCC) -V | grep -Po "release\s\K\w+\.\w")
 CC=$(NVCC) --std=c++17
 CUDA_INCLUDEPATH="/usr/local/cuda-$(CUDAVERSION)/targets/x86_64-linux/include"
-INCLUDE=-I ./cuda-samples -I /usr/include/opencv4 -I$(CUDA_INCLUDEPATH)
-LIBS=$(shell pkg-config --libs opencv4) -lnppist -lnppig -lnppidei  -lnppitc -lnppicc -lnppial -lnppisu_static -lnppif_static -lnppc_static -lculibos
+INCLUDE=-I ./cuda-samples -I ./cuda-samples/Common/ -I /usr/include/opencv4 -I$(CUDA_INCLUDEPATH)
+LIBS=$(shell pkg-config --libs opencv4) -lnppist -lnppig -lnppidei  -lnppitc -lnppicc -lnppial -lnppisu_static -lnppif_static -lnppc_static -lculibos 
 
 .PHONY: default
 default: mosaic
